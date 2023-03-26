@@ -2,7 +2,7 @@ import os
 import openai
 import streamlit as st
 from streamlit_chat import message
-
+from get_location import  get_coordinates
 
 st.title("🤖 chatBot : openAI GPT-3 for weather")
 placeholder = st.empty()
@@ -13,7 +13,8 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-first_message = "Welcome to the chatbot, Please enter the area to get the weather details \n for example: New York "
+first_message = "Welcome to the chatbot, Please enter the region to get the weather details \n" \
+                "for example: New York" 
 
 def get_text():
     input_text = st.text_input("You: ",value="", key="input",placeholder="Please ask your questions about the weather in the region: ")
@@ -21,10 +22,19 @@ def get_text():
 
 region  = st.text_input("You: ",value="", key="input_",placeholder=first_message)
 if(region and not st.session_state['generated']):
-    st.session_state.generated.append(f"You have asked for details in region: {region}")
-    st.session_state.past.append(f"I would like to know the weather details of: {region}")
-    # message(st.session_state['past'][0], is_user=True, key=str(400) + '_user')
-    # message(st.session_state["generated"][0], key=str(400))
+    # Get the full address and the coordinates based on information provided by user 
+    full_address, latitude, longitude  = get_coordinates(region)
+    if(full_address):
+        st.session_state.generated.append(f"You have asked for details in region: {region} \n " \
+                                            f"Full address: {full_address} \n " \
+                                            f"latitude: {latitude} \n " \
+                                            f"longitude: {latitude} ")
+        st.session_state.past.append(f"I would like to know the weather details of: {region}")
+    else:
+        st.session_state.generated.append(f"{region} is not a valid region, please enter a valid region")
+        st.session_state.past.append(f"")     
+    region = None
+
 
 user_input = get_text()
 if user_input:
