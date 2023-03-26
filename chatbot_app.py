@@ -3,6 +3,8 @@ import openai
 import streamlit as st
 from streamlit_chat import message
 from get_location import  get_coordinates
+from get_weather import get_weather
+
 
 st.title("🤖 chatBot : openAI GPT-3 for weather")
 placeholder = st.empty()
@@ -24,11 +26,14 @@ region  = st.text_input("You: ",value="", key="input_",placeholder=first_message
 if(region and not st.session_state['generated']):
     # Get the full address and the coordinates based on information provided by user 
     full_address, latitude, longitude  = get_coordinates(region)
+    weather_data = get_weather(latitude,longitude)
+    current_temp = weather_data["currently"]["temperature"]
     if(full_address):
         st.session_state.generated.append(f"You have asked for details in region: {region} \n " \
                                             f"Full address: {full_address} \n " \
                                             f"latitude: {latitude} \n " \
-                                            f"longitude: {latitude} ")
+                                            f"longitude: {longitude} \n" \
+                                            f"Current Temperature : {current_temp} \N{DEGREE SIGN}F")
         st.session_state.past.append(f"I would like to know the weather details of: {region}")
     else:
         st.session_state.generated.append(f"{region} is not a valid region, please enter a valid region")

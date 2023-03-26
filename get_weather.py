@@ -6,7 +6,7 @@ import json
 
 weather_key = os.environ["WEATHER_KEY"]
 
-def get_weather(longitude,latitude,save=True):
+def get_weather(latitude,longitude,save=True):
     """
     Get the api response in the form of the json data 
     Please make sure to ender valid coordinates 
@@ -14,7 +14,7 @@ def get_weather(longitude,latitude,save=True):
            latitude 
     """
     try:
-        url = f"https://api.myradar.dev/forecast/{longitude},{latitude}?extend=hourly&units=us&lang=en"
+        url = f"https://api.myradar.dev/forecast/{latitude},{longitude}?extend=hourly&units=us&lang=en"
 
         hdr ={
         # Request headers
