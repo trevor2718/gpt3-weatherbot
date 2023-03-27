@@ -3,8 +3,7 @@
 import urllib.request, json
 import os 
 import json
-
-weather_key = os.environ["WEATHER_KEY"]
+from api_key import weather_key
 
 def get_weather(latitude,longitude,save=True):
     """
