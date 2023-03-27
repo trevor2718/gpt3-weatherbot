@@ -126,8 +126,8 @@ def get_template(weather_data):
         
     template = f"The weather details for region with {weather_data.get('latitude', 'not available')} and " \
             f"longitude {weather_data.get('longitude', 'not available')} which is in timezone " \
-            f"{weather_data.get('imezone', 'not available')} \n\n" \
-            f"Weather details right now are {current_data} \n\n\n" \
+            f"{weather_data.get('timezone', 'not available')} \n\n\n" \
+            f"Weather details right now are {current_data} \n" \
             f"For the next few hours the weather is predicted as {hour_summary} with {hour_icon} \n" \
             f"For the each hour the weather details are {hourly_data} \n\n\n" \
             f"For the next few days the weather is predicted as {daily_summary} with {daily_icon} \n" \
