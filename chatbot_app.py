@@ -4,7 +4,7 @@ import streamlit as st
 from streamlit_chat import message
 from get_location import  get_coordinates
 from get_weather import get_weather
-
+from process_json.extract_data import get_template
 info = True 
 
 
@@ -29,7 +29,10 @@ region  = st.text_input("Please enter the region: ",value="", key="input_",place
 if(region and not st.session_state['generated']):
     # Get the full address and the coordinates based on information provided by user 
     full_address, latitude, longitude  = get_coordinates(region)
+    # Get weather from the api call 
     weather_data = get_weather(latitude,longitude)
+    template_weather_data = get_template(weather_data)
+    print(template_weather_data)
     current_temp = weather_data["currently"]["temperature"]
     if(full_address):
         st.session_state.generated.append(f"You have asked for details in region: {region} \n " \

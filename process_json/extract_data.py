@@ -6,9 +6,6 @@ import datetime
 def convert_time(timestamp):
     return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
-def format_float(value):
-    return "{:.3f}".format(value) if value is not None else "not available"
-
 def data_template_hourly(weather_data):
 
     # Convert the UNIX timestamp to a datetime object
@@ -30,45 +27,45 @@ def data_template_hourly(weather_data):
 def data_template_daily(weather_data):
 
     # Extract data from dictionary
-    time = convert_time(weather_data.get("time"))
-    summary = weather_data.get("summary")
-    icon = weather_data.get("icon")
-    sunrise_time = convert_time(weather_data.get("sunriseTime"))
-    sunset_time = convert_time(weather_data.get("sunsetTime"))
-    moon_phase = format_float(weather_data.get("moonPhase"))
-    precip_intensity = format_float(weather_data.get("precipIntensity"))
-    precip_intensity_max = format_float(weather_data.get("precipIntensityMax"))
-    precip_intensity_max_time = convert_time(weather_data.get("precipIntensityMaxTime"))
-    precip_probability = format_float(weather_data.get("precipProbability"))
-    precip_type = weather_data.get("precipType")
-    temperature_min = format_float(weather_data.get("temperatureMin"))
-    temperature_min_time = convert_time(weather_data.get("temperatureMinTime"))
-    temperature_max = format_float(weather_data.get("temperatureMax"))
-    temperature_max_time = convert_time(weather_data.get("temperatureMaxTime"))
-    temperature_low = format_float(weather_data.get("temperatureLow"))
-    temperature_low_time = convert_time(weather_data.get("temperatureLowTime"))
-    temperature_high = format_float(weather_data.get("temperatureHigh"))
-    temperature_high_time = convert_time(weather_data.get("temperatureHighTime"))
-    apparent_temperature_min = format_float(weather_data.get("apparentTemperatureMin"))
-    apparent_temperature_min_time = convert_time(weather_data.get("apparentTemperatureMinTime"))
-    apparent_temperature_max = format_float(weather_data.get("apparentTemperatureMax"))
-    apparent_temperature_max_time = convert_time(weather_data.get("apparentTemperatureMaxTime"))
-    apparent_temperature_low = format_float(weather_data.get("apparentTemperatureLow"))
-    apparent_temperature_low_time = convert_time(weather_data.get("apparentTemperatureLowTime"))
-    apparent_temperature_high = format_float(weather_data.get("apparentTemperatureHigh"))
-    apparent_temperature_high_time = convert_time(weather_data.get("apparentTemperatureHighTime"))
-    dew_point = format_float(weather_data.get("dewPoint"))
-    wind_speed = format_float(weather_data.get("windSpeed"))
-    wind_gust = format_float(weather_data.get("windGust"))
-    wind_gust_time = convert_time(weather_data.get("windGustTime"))
-    wind_bearing = format_float(weather_data.get("windBearing"))
-    cloud_cover = format_float(weather_data.get("cloudCover"))
-    humidity = format_float(weather_data.get("humidity"))
-    pressure = format_float(weather_data.get("pressure"))
-    visibility = format_float(weather_data.get("visibility"))
-    uv_index = format_float(weather_data.get("uvIndex"))
-    uv_index_time = convert_time(weather_data.get("uvIndexTime"))
-    ozone = format_float(weather_data.get("ozone"))
+    time = convert_time(weather_data.get("time", 0 ))
+    summary = weather_data.get("summary" ,'not available')
+    icon = weather_data.get("icon",'not available')
+    sunrise_time = convert_time(weather_data.get("sunriseTime",0))
+    sunset_time = convert_time(weather_data.get("sunsetTime",0))
+    moon_phase = weather_data.get("moonPhase",'not available')
+    precip_intensity = weather_data.get("precipIntensity",'not available')
+    precip_intensity_max = weather_data.get("precipIntensityMax",'not available')
+    precip_intensity_max_time = convert_time(weather_data.get("precipIntensityMaxTime",0))
+    precip_probability = weather_data.get("precipProbability",'not available')
+    precip_type = weather_data.get("precipType",'not available')
+    temperature_min = weather_data.get("temperatureMin",'not available')
+    temperature_min_time = convert_time(weather_data.get("temperatureMinTime",0))
+    temperature_max = weather_data.get("temperatureMax",'not available')
+    temperature_max_time = convert_time(weather_data.get("temperatureMaxTime",0))
+    temperature_low = weather_data.get("temperatureLow",'not available')
+    temperature_low_time = convert_time(weather_data.get("temperatureLowTime",0))
+    temperature_high = weather_data.get("temperatureHigh",'not available')
+    temperature_high_time = convert_time(weather_data.get("temperatureHighTime",0))
+    apparent_temperature_min = weather_data.get("apparentTemperatureMin",0)
+    apparent_temperature_min_time = convert_time(weather_data.get("apparentTemperatureMinTime",0))
+    apparent_temperature_max = weather_data.get("apparentTemperatureMax",'not available')
+    apparent_temperature_max_time = convert_time(weather_data.get("apparentTemperatureMaxTime",0))
+    apparent_temperature_low = weather_data.get("apparentTemperatureLow",'not available')
+    apparent_temperature_low_time = convert_time(weather_data.get("apparentTemperatureLowTime",0))
+    apparent_temperature_high = weather_data.get("apparentTemperatureHigh",'not available')
+    apparent_temperature_high_time = convert_time(weather_data.get("apparentTemperatureHighTime",0))
+    dew_point = weather_data.get("dewPoint",'not available')
+    wind_speed = weather_data.get("windSpeed",'not available')
+    wind_gust = weather_data.get("windGust",'not available')
+    wind_gust_time = convert_time(weather_data.get("windGustTime",0))
+    wind_bearing = weather_data.get("windBearing",'not available')
+    cloud_cover = weather_data.get("cloudCover",'not available')
+    humidity = weather_data.get("humidity",'not available')
+    pressure = weather_data.get("pressure",'not available')
+    visibility = weather_data.get("visibility",'not available')
+    uv_index = weather_data.get("uvIndex",'not available')
+    uv_index_time = convert_time(weather_data.get("uvIndexTime",0))
+    ozone = weather_data.get("ozone",'not available')
 
 
     # Generate paragraph
@@ -94,3 +91,53 @@ def data_template_daily(weather_data):
     paragraph += f"The ozone level is {ozone} dobson units."
 
     return paragraph
+
+def data_alerts(weather_data):
+    # Convert the UNIX timestamp to a datetime object
+    timestamp_start = datetime.datetime.fromtimestamp(weather_data.get("time", 0))
+    timestamp_stop = datetime.datetime.fromtimestamp(weather_data.get("expires", 0))
+
+    # Generate the paragraph
+    paragraph = f" You are requested to pay attention to the alert \n" \
+                f"Alert {weather_data.get('severity', 'not available')} " \
+                f"{weather_data.get('title', 'not available')} has been issued for the region " \
+                f" From {timestamp_start:%I:%M %p} on {timestamp_start:%A, %B %d, %Y}  to " \
+                f" to {timestamp_stop:%I:%M %p} on {timestamp_stop:%A, %B %d, %Y}  to " \
+                f"The details of the warning are {weather_data.get('description', 'not available')} \n\n" 
+    return paragraph 
+
+def get_template(weather_data):
+
+    current_data = data_template_hourly(weather_data["currently"])
+
+    hourly_data = "" 
+    for d in weather_data["hourly"]["data"]:
+        hourly_data = hourly_data + data_template_hourly(d)
+        hourly_data = hourly_data + "\n"
+    hour_summary = weather_data["hourly"]["summary"]
+    hour_icon = weather_data["hourly"]["icon"]
+
+    daily_data = "" 
+    for d in weather_data["daily"]["data"]:
+        daily_data = daily_data + data_template_daily(d)
+        daily_data = daily_data + "\n"
+    daily_summary = weather_data["daily"]["summary"]
+    daily_icon = weather_data["daily"]["icon"]
+        
+    template = f"The weather details for region with {weather_data.get('latitude', 'not available')} and " \
+            f"longitude {weather_data.get('longitude', 'not available')} which is in timezone " \
+            f"{weather_data.get('imezone', 'not available')} \n\n" \
+            f"Weather details right now are {current_data} \n\n\n" \
+            f"For the next few hours the weather is predicted as {hour_summary} with {hour_icon} \n" \
+            f"For the each hour the weather details are {hourly_data} \n\n\n" \
+            f"For the next few days the weather is predicted as {daily_summary} with {daily_icon} \n" \
+            f"For the each hour the weather details are {daily_data} \n\n\n"          
+
+    if("alerts" in weather_data):
+        alerts = weather_data["alerts"]
+        alert_data = "" 
+        for d in alerts:
+            alert_data = alert_data + data_alerts(d)
+        template = template + alert_data
+
+    return template 
