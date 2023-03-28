@@ -1,15 +1,12 @@
 import os 
-import openai
 import streamlit as st
 from streamlit_chat import message
 from get_location import  get_coordinates
 from get_weather import get_weather
-from process_json.extract_data import get_template
-from chatbot.chat_message_history import ChatBot
+from extract_data import get_template
+from chat_message_history  import ChatBot
 
-info = True 
-
-
+info = False
 
 st.title("🤖 chatBot : openAI GPT-3 for weather")
 placeholder = st.empty()
@@ -43,7 +40,6 @@ if(region):
     template = template + template_weather_data[0:10000]
 
     chatbot = ChatBot(template=template)
-    print(chatbot)
 
     current_temp = weather_data["currently"]["temperature"]
 if(region and not st.session_state['generated']):

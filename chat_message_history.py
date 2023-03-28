@@ -1,9 +1,10 @@
 import sys,os
-sys.path.append(os.path.realpath('..'))
 
 from langchain.llms import OpenAI
-from api_key import openapi_key
-OpenAI.api_key = openapi_key
+from dotenv import dotenv_values
+
+config = dotenv_values(".env") 
+OpenAI.api_key = config["openapi_key"]
 
 
 from langchain.embeddings.openai import OpenAIEmbeddings

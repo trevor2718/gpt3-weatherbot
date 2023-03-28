@@ -3,9 +3,11 @@
 import urllib.request, json
 import os 
 import json
-from api_key import weather_key
+from dotenv import dotenv_values
 
-def get_weather(latitude,longitude,save=True):
+config = dotenv_values(".env") 
+
+def get_weather(latitude,longitude,save=False):
     """
     Get the api response in the form of the json data 
     Please make sure to ender valid coordinates 
@@ -18,7 +20,7 @@ def get_weather(latitude,longitude,save=True):
         hdr ={
         # Request headers
         'Cache-Control': 'no-cache',
-        'Subscription-Key': weather_key,
+        'Subscription-Key': config["myradar_api_key"],
         }
 
         req = urllib.request.Request(url, headers=hdr)
