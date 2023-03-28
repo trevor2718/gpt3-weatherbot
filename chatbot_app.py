@@ -8,7 +8,7 @@ from chat_message_history  import ChatBot
 
 info = False
 
-st.title("🤖 chatBot : openAI GPT-3 for weather")
+st.title("ChatBot : openAI GPT-3 for weather")
 placeholder = st.empty()
 
 if 'generated' not in st.session_state:
@@ -35,9 +35,10 @@ if(region):
     template = """  You are a chatbot having a conversation about the above weather data. 
                     You are a polite chatbot and very interactive. You must provide very accurate and correct information, 
                     If you are unsure anout an answer just ask could you provide some more information, the information you have given is insufficient. 
+                    you must provide the answer in just one sentence. Do you use more than 1 sentence. 
 
     {chat_history} Human: {human_input} Chatbot:"""
-    template = template + template_weather_data[0:10000]
+    template = template_weather_data[0:10000] + template 
 
     chatbot = ChatBot(template=template)
 
