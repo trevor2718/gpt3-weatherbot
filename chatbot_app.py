@@ -40,7 +40,7 @@ if(region):
                     If you are unsure anout an answer just ask could you provide some more information, the information you have given is insufficient. 
 
     {chat_history} Human: {human_input} Chatbot:"""
-    template = template + template_weather_data
+    template = template + template_weather_data[0:10000]
 
     chatbot = ChatBot(template=template)
     print(chatbot)

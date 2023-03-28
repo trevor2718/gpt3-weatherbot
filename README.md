@@ -1,11 +1,13 @@
 # gpt3-weatherbot
 
 # Instructions to use the package 
-1. Setting up of api keys 
+1. Setting up of api keys, Once the keys are obtained place them keys in api_key.py file \
+  weather_key = "your weather token here" \
+  openapi_key = "your open api key here "
 
-  export OPENAI_API_KEY="your openai key" \
-  export WEATHER_KEY="your weather api token"
-
+Run this command to make sure that all the changes stays in your local directly \
+``` $ git update-index --skip-worktree api_key.py ``` 
+  
 The openapi key can be created here https://platform.openai.com/account/api-keys
 
 
