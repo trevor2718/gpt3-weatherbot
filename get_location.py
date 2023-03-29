@@ -5,9 +5,9 @@ loc = Nominatim(user_agent="GetLoc")
 
 def get_coordinates(region): 
     """
-    get geographical coordinated of a region on earth, 
+    Get geographical coordinates of a region, 
     More precise information can be obtained using googemaps which provides an api to get the information 
-    There are lot more features where we can even get cafes, resturants or parks near a location  
+    They provide lot more features i.e., where can we get a cafe, parks in the region  
     """
     getLoc = loc.geocode(region )
     if (getLoc.address):

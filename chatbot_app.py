@@ -8,7 +8,7 @@ from chat_message_history  import ChatBot
 
 info = False
 
-st.title("ChatBot : openAI GPT-3 for weather")
+st.title("MyRadar ChatBot for weather")
 placeholder = st.empty()
 
 if 'generated' not in st.session_state:
@@ -17,7 +17,7 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-first_message = "Welcome to the chatbot, Please enter the region to get the weather details \n" \
+first_message = "Welcome to myRadar, Please enter the region to get the weather details \n" \
                 "for example: New York" 
 
 def get_text():
@@ -32,10 +32,10 @@ if(region):
     weather_data = get_weather(latitude,longitude)
     template_weather_data = get_template(weather_data)
 
-    template = """  You are a chatbot having a conversation about the above weather data. 
-                    You are a polite chatbot and very interactive. You must provide very accurate and correct information, 
-                    If you are unsure anout an answer just ask could you provide some more information, the information you have given is insufficient. 
-                    you must provide the answer in just one sentence. Do you use more than 1 sentence. 
+    template = """  You are having a conversation about weather. 
+                    You are polite and interactive. You must provide very accurate and correct information, 
+                    If you are unsure about an answer just ask, Could you provide some more information, the information you have given is insufficient. 
+                    You must provide the answer in just one sentence. Do not use more than 2 sentence . 
 
     {chat_history} Human: {human_input} Chatbot:"""
     template = template_weather_data[0:10000] + template 

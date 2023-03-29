@@ -12,7 +12,7 @@ def data_template_hourly(weather_data):
     timestamp = datetime.datetime.fromtimestamp(weather_data.get("time", 0))
 
     # Generate the paragraph
-    paragraph = f"At {timestamp:%I:%M %p} on {timestamp:%A, %B %d, %Y}, the current weather condition is {weather_data.get('summary', 'not available')}. " \
+    paragraph = f"At {timestamp:%I:%M %p} on dat {timestamp:%A, %B %d, %Y}, the weather condition is {weather_data.get('summary', 'not available')}. " \
             f"The temperature is {weather_data.get('temperature', 'not available')} degrees Fahrenheit, with an apparent temperature of {weather_data.get('apparentTemperature', 'not available')} degrees Fahrenheit. " \
             f"The dew point is {weather_data.get('dewPoint', 'not available')} degrees Fahrenheit, and the relative humidity is {weather_data.get('humidity', 'not available') * 100}%. " \
             f"The wind speed is {weather_data.get('windSpeed', 'not available')} miles per hour, with gusts up to {weather_data.get('windGust', 'not available')} miles per hour from the direction of {weather_data.get('windBearing', 'not available')} degrees. " \

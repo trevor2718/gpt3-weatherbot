@@ -1,18 +1,12 @@
-import sys,os
-
 from langchain.llms import OpenAI
 from dotenv import dotenv_values
+from langchain import OpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain import OpenAI, LLMChain, PromptTemplate
+
 
 config = dotenv_values(".env") 
 OpenAI.api_key = config["openapi_key"]
-
-
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.text_splitter import CharacterTextSplitter
-from langchain import OpenAI, VectorDBQA
-from langchain.memory import ConversationBufferMemory
-from langchain import OpenAI, LLMChain, PromptTemplate
 
 class ChatBot:
     def __init__(self,template):
