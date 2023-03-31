@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyRadar Weather Chatbot</title>
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+  <!-- MDB -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">    
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"></script>
+  <link rel="stylesheet" href="/static/css/notifyit.css" />
+  <link rel="stylesheet" href="/static/css/jquery.growl.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script type="text/javascript" src="/static/js/notifyit.js"></script>
+</head>
+
+<body>
+  <section style="background-color: #CDC4F9;">
+    <div class="container py-5">
+
+      <div class="row">
+        <div class="col-md-12">
+
+          <div class="card" id="chat3" style="border-radius: 15px;">
+
+
+            <div class="card-header">
+              <div class="d-flex justify-content-between align-items-center">
+                    {% if data %}
+                    <button type="button" class="btn btn-link" onclick="window.location.href='/history';" ><span class="bi bi-arrow-left-circle-fill" style="font-size:2rem"></span></button>
+                    <h2>MyRadar Weather Chatbot</h2>
+                    <div></div>
+                    {% else %}
+                    <div></div>
+                    <h2>MyRadar Weather Chatbot</h2>
+                    <div></div>
+                    {% endif %}
+
+              </div>
+             
+            </div>
+               
+
+            <div class="card-body">
+
+              <div class="row">
+
+                <div class="col-md-12 col-lg-12 col-xl-12">
+
+                  
+                  <div id="chat-widget" class="pt-3 pe-3 overflow-auto" style="position: relative; max-height: 400px; ">
+                    
+                      {% for chat in data %}
+                      {% set display_time = chat['created'].split(' ') %}
+                        <div class="d-flex flex-row justify-content-end">
+                        <div>
+                          <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{chat['user_input']}}</p>
+                          <p class="small me-3 mb-3 rounded-3 text-muted">{{display_time[1]}}</p>
+                        </div>
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                          alt="avatar 1" style="width: 45px; height: 100%;">
+                        </div>
+
+
+                         <div class="d-flex flex-row justify-content-start">
+                          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+                            alt="avatar 1" style="width: 45px; height: 100%;">
+                          <div>
+                            <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">{{chat['chatbot_reply']}}</p>
+                            <p class="small ms-3 mb-3 rounded-3 text-muted float-end">{{display_time[1]}}</p>
+                          </div>
+                        </div>
+
+                      {% endfor %}
+                  
+
+
+                  </div>
+
+                  <div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+                      alt="avatar 3" style="width: 40px; height: 100%;">
+                    <input type="text" class="form-control form-control-lg" id="exampleFormControlInput2"
+                      placeholder="Type message">
+                    <a id="send_msg" class="ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
+                  </div>
+
+                </div>
+              </div>
+              
+
+            </div>
+             {% if data %}
+             <!-- <div style="display:grid;align-items: center;justify-content: center;"> -->
+              {% set data1 = data[0]['created'].split(' ') %}
+            <div>
+             <p style="text-align: center;"><b>Created At: </b> {{ data1[0] }} &emsp;
+             <b>UUID:</b> {{ data[0]['chat_uuid'] }} &emsp;
+             <b>IP Address:</b> {{ data[0]['user_ip'] }} &emsp;
+             <b>Location: </b> {{ data[0]['user_location'] }} &emsp; </p>
+             <!-- <b>Created At: </b> {{ data1[0] }} </p> -->
+           </div>
+             
+             {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script>
+    {% if data %}
+      console.log("No data")
+      $("#exampleFormControlInput2").prop('disabled', true);
+      $("#send_msg").prop('disabled', true);
+    {% else %}
+    $(function () {
+      $("#exampleFormControlInput2").focus();
+    })
+
+    $('#exampleFormControlInput2').keypress(function (e) {
+      var key = e.which;
+      if (key == 13)  // the enter key code
+      {
+        $("#send_msg").click();
+        return false;
+      }
+    });
+
+    $("#send_msg").click(async function () {
+      // disable till server reply
+      $(this).prop('disabled', true);
+      $("#exampleFormControlInput2").prop('disabled', true);
+
+      // get inputs
+      let user_msg = $("#exampleFormControlInput2").val()
+      $("#exampleFormControlInput2").val("")
+
+      if (user_msg.trim() != "") {
+        var d = new Date();
+        var cur_time = d.toLocaleTimeString();
+
+        await send_message(user_msg.trim());
+        update_chat(user_msg, cur_time, "user");
+        
+      }
+
+    })
+
+    // to send message to server and get reply
+    async function send_message(msg) {
+      $.post("/send_msg", { user_msg: msg }).done(function (data) {
+        
+        if (data && data.flag) {
+          if ( data.flag == "success" ){
+            // console.log(data)
+            var d = new Date();
+            var cur_time = d.toLocaleTimeString();
+
+            update_chat(data.msg, cur_time, "server")
+          } else if( data.flag == "fail" ){
+            error_notification(data.msg)  
+          } else{
+            error_notification("Some unknown server error occured.")  
+          }
+          
+        } else {
+          // error here
+          error_notification("Server isn't responding. Please try again later.")
+        }
+      }).fail(function (data){
+        error_notification("Server encountered 500 error. Please try again later.")  
+      }).always(function (data){
+        $("#send_msg").prop('disabled', false);
+        $("#exampleFormControlInput2").prop('disabled', false);
+        $("#exampleFormControlInput2").focus();
+      });
+    }
+
+    function update_chat(chat_msg, cur_time, chat_type) {
+      chat = ""
+      if (chat_type == "server") {
+        chat = `<div class="d-flex flex-row justify-content-start">
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+                          alt="avatar 1" style="width: 45px; height: 100%;">
+                        <div>
+                          <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">${chat_msg}</p>
+                          <p class="small ms-3 mb-3 rounded-3 text-muted float-end">${cur_time}</p>
+                        </div>
+                      </div>`
+      } else {
+        chat = `<div class="d-flex flex-row justify-content-end">
+                      <div>
+                        <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">${chat_msg}</p>
+                        <p class="small me-3 mb-3 rounded-3 text-muted">${cur_time}</p>
+                      </div>
+                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                        alt="avatar 1" style="width: 45px; height: 100%;">
+                    </div>`;
+
+      }
+      $("#chat-widget").append(chat)
+
+    var objDiv = document.getElementById("chat-widget");
+      $('#chat-widget').animate({ scrollTop: objDiv.scrollHeight });
+    }
+
+    function error_notification(msg) {
+      notif({
+        type: "error",
+        msg: `<b>Error: </b>${msg}`,
+        position: "center",
+        width: 500,
+        height: 60,
+        autohide: false
+      });
+    }
+
+    $(window).on('beforeunload', function() {
+    //Let jQuery take care of detecting browser and implement
+      $.post("/reset_session").done(function (data) {
+        console.log("Deleted the session...")
+      })
+      WindowCloseHanlder();
+    });
+    {% endif %}
+  </script>
+</body>
+
+</html>

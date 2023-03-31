@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyRadar Weather Chatbot</title>
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
+  <!-- MDB -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.1.0/mdb.min.js"></script>
+  <link rel="stylesheet" href="/static/css/notifyit.css" />
+  <link rel="stylesheet" href="/static/css/jquery.growl.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script type="text/javascript" src="/static/js/notifyit.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+  <style>
+    .card-header {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center;
+    }
+
+    code {
+      font-family: 'Space Mono', monospace !important;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <section style="background-color: #CDC4F9;">
+    <div class="container py-5">
+
+      <div class="row">
+        <div class="col-md-12">
+
+          <div class="card" id="chat3" style="border-radius: 15px;">
+
+
+            <div class="card-header" style="display: block !important;">
+              <div class="text-center">
+                <h2>MyRadar Weather Chatbot</h2>
+              </div>
+            </div>
+
+
+            <div class="card-body">
+
+              <div class="row">
+
+                <div class="col-md-12 col-lg-12 col-xl-12">
+
+
+                  <div id="chat-widget" class="pt-3 pe-3 overflow-auto" style="position: relative; max-height: 400px; ">
+
+                    {% for chat in data %}
+                    {% set display_time = chat['created'].split(' ') %}
+                    <div class="d-flex flex-row justify-content-end">
+                      <div>
+                        <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{chat['user_input']}}</p>
+                        <p class="small me-3 mb-3 rounded-3 text-muted">{{display_time[1]}}</p>
+                      </div>
+                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                        alt="avatar 1" style="width: 45px; height: 100%;">
+                    </div>
+
+
+                    <div class="d-flex flex-row justify-content-start">
+                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+                        alt="avatar 1" style="width: 45px; height: 100%;">
+                      <div>
+                        <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">
+                          {{chat['chatbot_reply']}}</p>
+                        <p class="small ms-3 mb-3 rounded-3 text-muted float-end">{{display_time[1]}}</p>
+                      </div>
+                    </div>
+
+                    {% endfor %}
+
+
+
+                  </div>
+
+                  <div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+                      alt="avatar 3" style="width: 40px; height: 100%;">
+                    <input type="text" class="form-control form-control-lg" id="exampleFormControlInput2"
+                      placeholder="Type message">
+                    <a id="send_msg" class="ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
+                  </div>
+
+                </div>
+              </div>
+
+
+            </div>
+            {% if data %}
+            <!-- <div style="display:grid;align-items: center;justify-content: center;"> -->
+            {% set data1 = data[0]['created'].split(' ') %}
+            <div>
+              <p style="text-align: center;"><b>Created At: </b> {{ data1[0] }} &emsp;
+                <b>UUID:</b> {{ data[0]['chat_uuid'] }} &emsp;
+                <b>IP Address:</b> {{ data[0]['user_ip'] }} &emsp;
+                <b>Location: </b> {{ data[0]['user_location'] }} &emsp;
+              </p>
+              <!-- <b>Created At: </b> {{ data1[0] }} </p> -->
+            </div>
+
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <script src="https://unpkg.com/tippy.js@6"></script>
+  <script>
+    code_count = 1
+    Prism.highlightAll();
+    var clipboard = new ClipboardJS('.copy_btn');
+    clipboard.on('success', function (e) {
+      e.clearSelection();
+    });
+
+    function show_tippy(instance) {
+      tippy_instance = tippy(instance)
+      tippy_instance.show();
+    }
+    
+    {% if data %}
+      console.log("No data")
+      $("#exampleFormControlInput2").prop('disabled', true);
+      $("#send_msg").prop('disabled', true);
+    {% else %}
+      $(function () {
+        $("#exampleFormControlInput2").focus();
+      })
+
+      $('#exampleFormControlInput2').keypress(function (e) {
+        var key = e.which;
+        if (key == 13)  // the enter key code
+        {
+          $("#send_msg").click();
+          return false;
+        }
+      });
+
+      $("#send_msg").click(async function () {
+        // disable till server reply
+        $(this).prop('disabled', true);
+        $("#exampleFormControlInput2").prop('disabled', true);
+
+        // get inputs
+        let user_msg = $("#exampleFormControlInput2").val()
+        $("#exampleFormControlInput2").val("")
+
+        if (user_msg.trim() != "") {
+          var d = new Date();
+          var cur_time = d.toLocaleTimeString();
+
+          await send_message(user_msg.trim());
+          update_chat(user_msg, cur_time, "user");
+
+        }
+
+      })
+
+      // to send message to server and get reply
+      async function send_message(msg) {
+        $.post("/get_chat_gpt_reply", { user_msg: msg }).done(function (data) {
+
+          if (data && data.flag) {
+            if (data.flag == "success") {
+              // console.log(data)
+              var d = new Date();
+              var cur_time = d.toLocaleTimeString();
+
+              update_chat(data.msg, cur_time, "server")
+            } else if (data.flag == "fail") {
+              error_notification(data.msg)
+            } else {
+              error_notification("Some unknown server error occured.")
+            }
+
+          } else {
+            // error here
+            error_notification("Server isn't responding. Please try again later.")
+          }
+        }).fail(function (data) {
+          error_notification("Server encountered 500 error. Please try again later.")
+        }).always(function (data) {
+          $("#send_msg").prop('disabled', false);
+          $("#exampleFormControlInput2").prop('disabled', false);
+          $("#exampleFormControlInput2").focus();
+        });
+      }
+
+      function update_chat(chat_msg, cur_time, chat_type) {
+        
+        if (chat_type == "server") {
+          var key = "```";
+
+          var all_index = [];
+          var chat = `<div class="d-flex flex-row justify-content-start">
+                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 1" style="width: 45px; height: 100%;">
+                      <div>
+                        <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">`
+
+          var index_occurence = chat_msg.indexOf(key, 0);
+         
+          while (index_occurence >= 0) {
+            all_index.push(index_occurence);
+            index_occurence = chat_msg.indexOf(key, index_occurence + 1);
+          }
+
+          // console.log("index_occurence => ", all_index)
+
+          // console.log("start index_occurence => ", all_index[0] + 3)
+          // console.log("end index_occurence => ", all_index[1] + 3)
+
+          // console.log("start index_occurence => ", chat_msg[all_index[0]])
+          // console.log("end index_occurence => ", chat_msg[all_index[1]])
+
+          if ( all_index.length > 0 )
+          {
+              code_tags = all_index.length / 2
+
+              for (i=0; i<code_tags; i++){
+                console.log('hello ', i)
+                start = i + i;
+                end = start + 1;
+                original_start = all_index[start]
+                original_end = all_index[end]
+                
+
+
+                code = chat_msg.substring(original_start, original_end + 3).trim();
+                // lang_name = code.split('\n')[0].trim().substring(3)
+                lang_name = "language code"
+
+                copy_btn = `<button class='btn btn-light copy_btn' data-tippy-duration='0' data-tippy-arrow='true' data-tippy-delay='[0, 500]' onclick='show_tippy(this)' data-tippy-content='Copied!' data-clipboard-target='#code_${code_count}'><i class='fa-regular fa-paste'></i></button>`
+
+                // remove ``` at start and at the end. remove language name eg python, java before putting it in the code
+                div_card = `<div class="card mb-2">
+                            <div class="card-header bg-dark text-white">
+                              <b>${lang_name}</b> ${copy_btn}
+                            </div>
+                            <div class="card-body" style="background-color:#bca1de4a">
+                              <pre><code id="code_${code_count}">${code.substring(3, code.length - 3)}</code></pre>
+                            </div>
+                          </div>`
+
+                new_chat_msg = chat_msg.replace(code, div_card)
+                console.log("code => ", code)
+
+                console.log("chat msg => ", chat_msg)
+                chat += new_chat_msg
+                
+                code_count += 1;
+              }
+          }else{
+            chat += chat_msg
+          }
+
+          
+          chat += `</p>
+                        <p class="small ms-3 mb-3 rounded-3 text-muted float-end">${cur_time}</p>
+                      </div>
+                    </div>`
+        } else {
+          chat = `<div class="d-flex flex-row justify-content-end">
+                        <div>
+                          <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">${chat_msg}</p>
+                          <p class="small me-3 mb-3 rounded-3 text-muted">${cur_time}</p>
+                        </div>
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                          alt="avatar 1" style="width: 45px; height: 100%;">
+                      </div>`;
+
+        }
+        $("#chat-widget").append(chat)
+
+        var objDiv = document.getElementById("chat-widget");
+        $('#chat-widget').animate({ scrollTop: objDiv.scrollHeight });
+      }
+
+      function error_notification(msg) {
+        notif({
+          type: "error",
+          msg: `<b>Error: </b>${msg}`,
+          position: "center",
+          width: 500,
+          height: 60,
+          autohide: false
+        });
+      }
+
+      $(window).on('beforeunload', function () {
+        //Let jQuery take care of detecting browser and implement
+        $.post("/reset_session").done(function (data) {
+          console.log("Deleted the session...")
+        })
+        WindowCloseHanlder();
+      });
+    {% endif %}
+  </script>
+</body>
+
+</html>
