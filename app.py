@@ -98,8 +98,6 @@ def _get_chat_gpt_reply():
             # insert into db
             insert_to_db(chat_uuid, user_msg, chatbot_reply, previous_chat.replace("\n", "<br />"), json.dumps( openai_response),ip_addr, g.city )
             
-            # insert_to_db(chat_uuid, user_msg, chatbot_reply, previous_chat.replace("\n", "<br />"), json.dumps( openai_response),ip_addr, "new york" )
-            
             dialogs = f"{ previous_chat.strip() }\nUser: {user_msg}\nChatbot: {chatbot_reply}\n"
             
             # set previous chat most recent 10 chats

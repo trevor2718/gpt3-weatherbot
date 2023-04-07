@@ -1,6 +1,8 @@
 import requests
 import datetime
 from dateparser import parse
+import geocoder
+
 
 from dotenv import dotenv_values
 from geopy.geocoders import Nominatim
@@ -21,7 +23,14 @@ def get_lat_long(location_name):
         location = geolocator.geocode(location_name)
         lat, long = location.latitude, location.longitude
     except Exception as e:
-        print("error => ", e)
+        print("error with geopy => ", e)
+        print("trying geocoder api")
+        try:
+            location = geocoder.osm(location_name)
+            lat, long = location.latlng
+            
+        except Exception as e:
+            print("33 error with geocoder too => ", e)
     
     # print("location.latitude, location.longitude => ", lat, long)
     return lat, long
@@ -67,9 +76,9 @@ def get_chatbot_reply(user_msg, previous_chat, location, date_time):
         uv = forecast_data.get("uvIndex")
         hourly_summary = main_forecast_data.get("hourly").get("summary")
         if date_time:
-            weather_prompt = f"""If asked about weather act as a weather chatbot and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tAbove forecast details are for: {date_time}\n\nIf user is doing Routine conversation do everyday chat with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Weather Chatbot: """
+            weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tAbove forecast details are for: {date_time}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
         else:
-            weather_prompt = f"""If asked about weather act as a weather chatbot and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tGeneral weather summary: {hourly_summary}\n\nIf user is doing Routine conversation do everyday chat with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Weather Chatbot: """
+            weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tGeneral weather summary: {hourly_summary}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
             
         
         print("weather_prompt => ", weather_prompt)
