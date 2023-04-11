@@ -6,34 +6,16 @@ config = dotenv_values(".env")
 
 openai.api_key = config["openai_key"]
 
-def get_chat_gpt_response(previous_chat, user_msg):
+def get_chat_gpt_response(previous_chat, prompt):
     msg_list = [
-          
+          {
+            "role": "user",
+            "content": prompt
+        }
     ]
     
-    # if previous_chat:
-    #     previous_list = previous_chat.split("\n")
-    #     previous_list.reverse()
-    #     for chat in previous_list:
-    #         if chat.strip().startswith("Chatbot:"):
-    #             msg_list.append({
-    #                 "role": "system",
-    #                 "content": chat.strip().replace("Chatbot:", "")
-    #             })
-    #         else:
-    #              msg_list.append({
-    #                 "role": "user",
-    #                 "content": chat.strip().replace("User:", "")
-    #             })
-    # else:
-    #     msg_list = [ { "role": "user", "content": user_msg } ]
-    
-    msg_list.append({
-            "role": "user",
-            "content": user_msg
-        })
     # print("previous_chat ", previous_chat)
-    # print(" get_chat_gpt_response msg_list user_msg => ", user_msg )
+    # print(" get_chat_gpt_response msg_list prompt => ", prompt )
     # print("===================================")
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo", 

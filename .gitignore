@@ -134,3 +134,11 @@ Dev prototype.pdf
 .env
 florida_we.json
 hurdat2-1851-2022-04042023.txt
+.xdp_chatgpt*
+chatgpt-hudart-testing.ipynb
+convert_dataset.py
+HURDAT2_11042023_testing.txt
+relative_location_name.csv
+testing-doc.txt
+update-doc.txt
+with_location_name_hudart.csv

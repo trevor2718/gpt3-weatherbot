@@ -7,10 +7,10 @@ import geocoder
 import time
 
 # manual file imports
-from chat_utils import update_previous_chat, get_previous_chat, set_previous_chat
-from db_utils import get_db_connection, insert_to_db, check_daily_limit
+# from chat_utils import update_previous_chat, get_previous_chat, set_previous_chat
+# from db_utils import get_db_connection, insert_to_db, check_daily_limit
 from chat_gpt_utils import get_chat_gpt_response, get_location_from_chat_gpt
-from myradar_utils import get_forecast_data, get_lat_long, get_chatbot_reply, find_datetime_location, convert_timestamp
+from myradar_utils import get_chatbot_reply, find_datetime_location,get_hurdat_response, is_valid_hurdat_response
 
 
 config = dotenv_values(".env") 
@@ -73,6 +73,23 @@ def _get_chat_gpt_reply():
             previous_chat = ""
 
             # print("previous chat => ", previous_chat)
+            
+            # check whether chat is about hurricane or weather
+            hurdat_response = get_hurdat_response(user_msg)
+            hurdat_flag = is_valid_hurdat_response(hurdat_response)
+            
+            # return to chatbot here if flag is true
+            if hurdat_flag:
+                # got the answer from the HURDAT2 database
+                cur_time = str(datetime.timedelta(seconds=666))
+                r_data = {
+                    "flag": "success",
+                    "msg": hurdat_response,
+                    "time": cur_time
+                }
+                return jsonify(r_data)
+            
+            
             openai_response = get_location_from_chat_gpt(user_msg)
             chatbot_reply = openai_response["choices"][0]["message"]["content"]
             new_location, new_date_time = find_datetime_location(chatbot_reply)
@@ -96,12 +113,12 @@ def _get_chat_gpt_reply():
             g = geocoder.ip(ip_addr)
               
             # insert into db
-            insert_to_db(chat_uuid, user_msg, chatbot_reply, previous_chat.replace("\n", "<br />"), json.dumps( openai_response),ip_addr, g.city )
+            # insert_to_db(chat_uuid, user_msg, chatbot_reply, previous_chat.replace("\n", "<br />"), json.dumps( openai_response),ip_addr, g.city )
             
-            dialogs = f"{ previous_chat.strip() }\nUser: {user_msg}\nChatbot: {chatbot_reply}\n"
+            # dialogs = f"{ previous_chat.strip() }\nUser: {user_msg}\nChatbot: {chatbot_reply}\n"
             
             # set previous chat most recent 10 chats
-            set_previous_chat( dialogs.lstrip() )
+            # set_previous_chat( dialogs.lstrip() )
             
             
             # not using server chat timings. just sending from sever to client
@@ -128,7 +145,7 @@ def _chat_gpt():
     return render_template("chat_gpt.html")
 
 
-@app.route('/history')
+@app.route('/history', methods=["POST"])
 def _history():
     conn = get_db_connection()
     data=conn.execute('''SELECT min(created) AS created, min(user_location) as user_location, min(user_ip) as user_ip, chat_uuid
@@ -138,7 +155,7 @@ def _history():
     return render_template("history.html", data=data)
 
 
-@app.route('/chat_history',methods=['GET','POST'])
+@app.route('/chat_history',methods=['POST'])
 def chat_history():
     chat_uuid=request.args.get("chat_uuid")
     conn = get_db_connection()
