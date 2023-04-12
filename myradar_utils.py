@@ -233,7 +233,7 @@ def get_hurdat_response(user_msg):
         if python_result == "Python: SyntaxError":
             print("got python error, trying again to fix the issue")
             new_prompt = fix_code_prompt(python_code, error)
-            response = get_chat_gpt_response(new_prompt)
+            response = get_chat_gpt_response("", new_prompt)
             python_code = response["choices"][0]["message"]["content"]
             python_result, error = evaluate_code(python_code)
             

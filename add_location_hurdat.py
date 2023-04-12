@@ -27,6 +27,8 @@ new_country_data =["NaN"] * len(df)
 new_df = pd.DataFrame(columns=['state_name', 'country_name'])
 
 for index, row in tqdm(df.iterrows()):
+    if index < 12100:
+        continue
     try:
         state, country = "NaN", "NaN"
         if row['latitude'] and row['longitude']:
