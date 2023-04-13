@@ -11,7 +11,8 @@ import time
 # from db_utils import get_db_connection, insert_to_db, check_daily_limit
 from chat_gpt_utils import get_chat_gpt_response, get_location_from_chat_gpt
 from myradar_utils import get_chatbot_reply, find_datetime_location,get_hurdat_response, is_valid_hurdat_response
-
+from load_hurdat_data import download_latest_data
+from convert_dataset import convert_to_df
 
 config = dotenv_values(".env") 
 
@@ -143,6 +144,23 @@ def _get_chat_gpt_reply():
 @app.route('/')
 def _chat_gpt():
     return render_template("chat_gpt.html")
+
+
+@app.route('/download_data')
+def _preprocess_data():
+    try:
+        file_path = download_latest_data()
+        print("downlaoded path => ", file_path)
+        if file_path:
+            df_path = convert_to_df(file_path)
+            if df_path:
+                return "Data loaded successfully."
+            else:
+                return "Could not convert the data. Please try again later."
+        else:
+            return "Could not load the data. Please try again later."
+    except Exception as e:
+        return "Error while preprocessing the data. Please try again later."
 
 
 @app.route('/history', methods=["POST"])

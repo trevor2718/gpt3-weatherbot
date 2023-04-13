@@ -9,13 +9,34 @@ import pandas as pd
 from dotenv import dotenv_values
 from geopy.geocoders import Nominatim
 from chat_gpt_utils import get_chat_gpt_response
+from misc_utils import get_latest_csv_file
+from load_hurdat_data import download_latest_data
+from convert_dataset import convert_to_df
 
 geolocator = Nominatim(user_agent="MyRadar Weather App")
 config = dotenv_values(".env") 
 
 myradar_api_key = config["myradar_api_key"]
 
-df = pd.read_csv("./new_hur.csv")
+latest_csv_file = get_latest_csv_file()
+
+if not latest_csv_file:
+    print("csv file data not found. initiating download")
+    file_path = download_latest_data()
+    if file_path:
+        print("downloaded csv data ")
+        df_path = convert_to_df(file_path)
+        if df_path:
+            print("Text data succesfully converted.")
+            latest_csv_file = get_latest_csv_file()
+        else:
+            print("unable to convert text data to csv data")
+            exit()
+    else:
+        print("unable to download csv data ")
+        exit()
+    
+df = pd.read_csv(latest_csv_file)
 
 
 def get_lat_long(location_name):
@@ -163,7 +184,8 @@ def get_time_comparision(user_time, json_data):
 
 # takes user's query and outputs the prompt
 def create_hudat_prompt(user_query):
-    column_names = "index, basin, atcf_cyclone_number_for_that_year, name, year, month, day, hours_in_utc, minutes_in_utc, record_identifier, record_identifier_desc, status_of_system, status_of_system_desc, latitude, longitude"
+    print("using data from => ", latest_csv_file)
+    column_names = "index, basin, atcf_cyclone_number_for_that_year, name, year, month, day, hours_in_utc, minutes_in_utc, record_identifier, record_identifier_desc, status_of_system, status_of_system_desc, latitude, longitude, maximum_sustained_wind_in_knots, minimum_pressure_in_millibars"
     prompt = f"""
 Below are the HURDAT2 CSV database columns loaded into dataframe.
 Dataframe Columns:

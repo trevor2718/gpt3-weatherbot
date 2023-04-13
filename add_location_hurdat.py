@@ -1,10 +1,13 @@
 import pandas as pd
 from tqdm import tqdm
 from geopy.geocoders import Nominatim
+from misc_utils import get_latest_csv_file
+
 # Initialize the geolocator
 geolocator = Nominatim(user_agent="my-app")
+latest_csv_file = get_latest_csv_file()
 
-df = pd.read_csv("new_hur.csv")
+df = pd.read_csv(latest_csv_file)
 
 def get_location_name(latitude, longitude):
     # Use the reverse() method of the geolocator to get the location name
@@ -27,11 +30,13 @@ new_country_data =["NaN"] * len(df)
 new_df = pd.DataFrame(columns=['state_name', 'country_name'])
 
 for index, row in tqdm(df.iterrows()):
-    if index < 12100:
-        continue
+    # if index < 12100:
+    #     continue
     try:
         state, country = "NaN", "NaN"
         if row['latitude'] and row['longitude']:
+            print("row['latitude'] => ", row['latitude'], "== row['longitude'] => ", row['longitude'])
+            
             state, country = get_location_name(row['latitude'], row['longitude'])
             
             if not state and state.strip() == "":
@@ -40,7 +45,7 @@ for index, row in tqdm(df.iterrows()):
             if not country and country.strip() == "":
                 country = "NaN"
                 
-        # print("state name => ", state, "country name => ", country)
+        print("state name => ", state, "country name => ", country)
         new_state_data[index] = state
         new_country_data[index] = country
 
@@ -51,18 +56,18 @@ for index, row in tqdm(df.iterrows()):
         print("\n writing the file")
         new_df = new_df.assign(state_name=new_state_data)
         new_df = new_df.assign(country_name=new_country_data)
-        new_df.to_csv("relative_location_name.csv", index=False)
+        new_df.to_csv("relative_location_name_13.csv", index=False)
     
     
     if index % 100 == 0:
         new_df = new_df.assign(state_name=new_state_data)
         new_df = new_df.assign(country_name=new_country_data)
-        new_df.to_csv("relative_location_name.csv", index=False)
+        new_df.to_csv("relative_location_name_13.csv", index=False)
     
     
 new_df = new_df.assign(state_name=new_state_data)
 new_df = new_df.assign(country_name=new_country_data)
-new_df.to_csv("relative_location_name_1.csv", index=False)
+new_df.to_csv("relative_location_name_13_1.csv", index=False)
 # df = df.assign(state_name=new_state_data)
 # df = df.assign(country_name=new_country_data)
 # new_df.to_csv("with_location_name_hudart.csv", index=False)

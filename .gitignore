@@ -142,3 +142,7 @@ relative_location_name.csv
 testing-doc.txt
 update-doc.txt
 with_location_name_hudart.csv
+static_location.py
+myradar_api_response.json
+hurdat_data/
+relative_location_name*
