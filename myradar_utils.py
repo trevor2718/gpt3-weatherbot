@@ -214,6 +214,7 @@ Instructions:
     - Use print statements to answer user query in single sentence.
     - Respond with the python code only.
     - Do not explain the code.
+    - Current year is {datetime.now().year}
     - Strictly reply 'print("cant_find")' if User Query is not related to HURDAT2.
 Python Code: {python_code}\n
 Error: {error}
@@ -266,9 +267,14 @@ def get_hurdat_response(user_msg):
     
     
 def is_valid_hurdat_response(hurdat_response):
-
+    if not hurdat_response:
+        return False 
+    
     if hurdat_response and ( hurdat_response.strip() == "[]" or  hurdat_response.strip() == ""):
         print("empty array or empty response using hurdat prompt")
+        return False
+    
+    if hurdat_response.strip().lower() == "nan":
         return False
     
     if not hurdat_response:
