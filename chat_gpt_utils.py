@@ -13,16 +13,56 @@ def get_chat_gpt_response(previous_chat, prompt):
             "content": prompt
         }
     ]
-    
-    # print("previous_chat ", previous_chat)
-    # print(" get_chat_gpt_response msg_list prompt => ", prompt )
-    # print("===================================")
+
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo", 
-        messages=msg_list )
+        messages=msg_list,
+        temperature=0.0,
+        top_p=1.0,
+        n=3,
+        stream= False,
+        max_tokens= 192,
+        presence_penalty= 0,
+        frequency_penalty= 0
+    )
 
     # print(completion)
     # res_str = completion["choices"][0]["message"]["content"]
+    return completion
+
+
+def get_chat_gpt_parameterized_response(prompt):
+    msg_list = [
+          {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+    
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", 
+        messages=msg_list,
+        # temperature=0.0,
+        # top_p=1.0,
+        # n=3,
+        # stream= False,
+        # max_tokens= 192,
+        # presence_penalty= 0,
+        # frequency_penalty= 0
+    )
+    
+    # completion = openai.ChatCompletion.create(
+    #     model="gpt-3.5-turbo", 
+    #     messages=msg_list,
+    #     temperature=0.0,
+    #     top_p=1.0,
+    #     n=3,
+    #     stream= False,
+    #     max_tokens= 192,
+    #     presence_penalty= 0,
+    #     frequency_penalty= 0
+    # )
+
     return completion
 
 

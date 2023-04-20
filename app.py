@@ -54,7 +54,7 @@ def _get_chat_gpt_reply():
         ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
         
         user_msg = request.form.get("user_msg")
-        if (user_msg is not None) or (not user_msg) or (not user_msg.strip == ""):
+        if (user_msg is not None) or (not user_msg) or (not user_msg.strip() == ""):
             
             # set unique token per user
             if "unique_token" not in session:
@@ -111,18 +111,6 @@ def _get_chat_gpt_reply():
                 # print("session location 92 => ", session['location'])
                 chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
                     
-            g = geocoder.ip(ip_addr)
-              
-            # insert into db
-            # insert_to_db(chat_uuid, user_msg, chatbot_reply, previous_chat.replace("\n", "<br />"), json.dumps( openai_response),ip_addr, g.city )
-            
-            # dialogs = f"{ previous_chat.strip() }\nUser: {user_msg}\nChatbot: {chatbot_reply}\n"
-            
-            # set previous chat most recent 10 chats
-            # set_previous_chat( dialogs.lstrip() )
-            
-            
-            # not using server chat timings. just sending from sever to client
             cur_time = str(datetime.timedelta(seconds=666))
             r_data = {
                 "flag": "success",

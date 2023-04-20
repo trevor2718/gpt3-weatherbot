@@ -5,10 +5,11 @@ import geocoder
 import io
 from contextlib import redirect_stdout
 import pandas as pd
+# import numpy as np
 
 from dotenv import dotenv_values
 from geopy.geocoders import Nominatim
-from chat_gpt_utils import get_chat_gpt_response
+from chat_gpt_utils import get_chat_gpt_response, get_chat_gpt_parameterized_response
 from misc_utils import get_latest_csv_file
 from load_hurdat_data import download_latest_data
 from convert_dataset import convert_to_df
@@ -114,7 +115,7 @@ def get_chatbot_reply(user_msg, previous_chat, location, date_time):
 
         return chatbot_reply, openai_response
     else:
-        return "Some error occured. Unable to get the forecast details. Please try", {}
+        return "Some error occured. Unable to get the forecast details. Please try later", {}
     
 
 def find_datetime_location(chatbot_response):
@@ -183,45 +184,39 @@ def get_time_comparision(user_time, json_data):
 
 
 # takes user's query and outputs the prompt
-def create_hudat_prompt(user_query):
+def create_hurdat_prompt(user_query):
     print("using data from => ", latest_csv_file)
     column_names = "index, basin, atcf_cyclone_number_for_that_year, name, year, month, day, hours_in_utc, minutes_in_utc, record_identifier, record_identifier_desc, status_of_system, status_of_system_desc, latitude, longitude, maximum_sustained_wind_in_knots, minimum_pressure_in_millibars"
     prompt = f"""
 Below are the HURDAT2 CSV database columns loaded into dataframe.
 Dataframe Columns:
-    {column_names}
+{column_names}
+Sample Dataframe data:
+{column_names}
+53346,AL,17,ROSE,2021,9,22,0,0,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),22.7,-37.7,35.0,1008.0
+53347,AL,17,ROSE,2021,9,22,0,60,,,TD,Tropical cyclone of tropical depression intensity (< 34 knots),23.1,-38.1,30.0,1009.0
+53348,AL,17,ROSE,2021,9,22,1,20,,,LO,"A low that is neither a tropical cyclone, a subtropical cyclone, nor an extratropical cyclone (of any intensity)",23.4,-38.8,30.0,1009.0
+53261,AL,14,NICHOLAS,2021,9,14,0,53,L,Landfall (center of system crossing a coastline),HU,Tropical cyclone of hurricane intensity (> 64 knots),28.7,-95.7,65.0,991.0
+53243,AL,12,LARRY,2021,9,11,1,80,,,EX,Extratropical cyclone (of any intensity),55.3,-46.8,55.0,967.0
 Instructions:
     - Assume that the data is there in the pandas dataframe and dataframe is defined as `df`.
     - Only provide python code for the given query.
     - Do not form any textual sentence.
-    - Use print statements to answer user query in single sentence.
+    - Landfall is denoted as 'L' in the `record_identifier` column.
+    - Name of the cyclones are in the `name` column.
+    - Use only `record_identifier` column to find Landfall related queries.
+    - Use print statements to answer user query only in single sentence.
     - Respond with the python code only.
     - Do not explain the code.
+    - Current year is {datetime.datetime.now().year}.
+    - Include `year` column in each response.
+    - Try to form a sentence in a print statement.
     - Strictly reply 'print("cant_find")' if User Query is not related to HURDAT2.
 Using above Dataframe Columns and follow instructions strictly to generate only python code.
 User Query: {user_query}
 """
     return prompt
 
-
-# if first response 
-def fix_code_prompt(python_code, error):
-    prompt = f"""Act as a Python interpreter and solve the following. Respond with the python code only.
-Instructions:
-    - Assume that the data is there in the pandas dataframe and dataframe is defined as `df`.
-    - Only provide python code for the given query.
-    - Do not form any textual sentence.
-    - Use print statements to answer user query in single sentence.
-    - Respond with the python code only.
-    - Do not explain the code.
-    - Current year is {datetime.now().year}
-    - Strictly reply 'print("cant_find")' if User Query is not related to HURDAT2.
-Python Code: {python_code}\n
-Error: {error}
-New Python Code: 
-"""
-    return prompt
-    
 
 def evaluate_code(python_code):
     error = ""
@@ -235,6 +230,7 @@ def evaluate_code(python_code):
 
         # Get the output as a string
         python_result = output.getvalue()
+        python_result = python_result.strip()
         print("python_result => ", python_result)
     
     except Exception as e:
@@ -247,18 +243,16 @@ def evaluate_code(python_code):
 
 def get_hurdat_response(user_msg):
     try:
-        prompt = create_hudat_prompt(user_msg)
-        response = get_chat_gpt_response("", prompt)
-        python_code = response["choices"][0]["message"]["content"]
-        python_result, error = evaluate_code(python_code)
-
-
-        if python_result == "Python: SyntaxError":
-            print("got python error, trying again to fix the issue")
-            new_prompt = fix_code_prompt(python_code, error)
-            response = get_chat_gpt_response("", new_prompt)
-            python_code = response["choices"][0]["message"]["content"]
+        prompt = create_hurdat_prompt(user_msg)
+        response = get_chat_gpt_parameterized_response(prompt)
+        print("response +++ ===>> ", response["choices"])
+        print("\n\n\n")
+        for res in response["choices"]:
+            python_code = res["message"]["content"]
             python_result, error = evaluate_code(python_code)
+
+            if python_result and  ( python_result != "Python: SyntaxError" or ( not str(python_result).startswith("Empty DataFrame") ) or not( str(python_result).startswith("cant_find") ) ):
+                break
             
         return python_result
     except Exception as e:
@@ -267,8 +261,12 @@ def get_hurdat_response(user_msg):
     
     
 def is_valid_hurdat_response(hurdat_response):
+    
     if not hurdat_response:
         return False 
+    
+    if str(hurdat_response).strip().startswith("Empty DataFrame"):
+        return False        
     
     if hurdat_response and ( hurdat_response.strip() == "[]" or  hurdat_response.strip() == ""):
         print("empty array or empty response using hurdat prompt")
