@@ -34,10 +34,12 @@ if not latest_csv_file:
             print("unable to convert text data to csv data")
             exit()
     else:
-        print("unable to download csv data ")
+        print("Unable to download csv data. Program will exit.")
         exit()
-    
+
 df = pd.read_csv(latest_csv_file)
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
 
 
 def get_lat_long(location_name):
@@ -202,17 +204,17 @@ Instructions:
     - Assume that the data is there in the pandas dataframe and dataframe is defined as `df`.
     - Only provide python code for the given query.
     - Do not form any textual sentence.
-    - Landfall is denoted as 'L' in the `record_identifier` column.
     - Name of the cyclones are in the `name` column.
+    - Landfall is denoted as 'L' in the `record_identifier` column.
     - Use only `record_identifier` column to find Landfall related queries.
-    - Use print statements to answer user query only in single sentence.
     - Respond with the python code only.
     - Do not explain the code.
     - Current year is {datetime.datetime.now().year}.
-    - Include `year` column in each response.
+    - Include `year` column in each response wherever necessary.
+    - Provide year along with the cyclone names.
     - Try to form a sentence in a print statement.
     - Strictly reply 'print("cant_find")' if User Query is not related to HURDAT2.
-Using above Dataframe Columns and follow instructions strictly to generate only python code.
+Use above Dataframe Columns, Sample data and follow the instructions strictly to generate only python code.
 User Query: {user_query}
 """
     return prompt
@@ -244,7 +246,10 @@ def evaluate_code(python_code):
 def get_hurdat_response(user_msg):
     try:
         prompt = create_hurdat_prompt(user_msg)
-        response = get_chat_gpt_parameterized_response(prompt)
+        
+        # this will get 3 responses from the ChatGPT
+        response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=3, stream=False, max_tokens=192, presence_penalty=0, frequency_penalty=0 )
+        
         print("response +++ ===>> ", response["choices"])
         print("\n\n\n")
         for res in response["choices"]:
@@ -259,7 +264,27 @@ def get_hurdat_response(user_msg):
         print("error in get hurdat_response => ", e)
         return None
     
-    
+
+def get_formatted_response(user_input, gpt3_output):
+    prompt = f"""
+Create an informative response from the given Dataframe Answer and User query. The response should be in a sentence or paragraph for the below given Dataframe Answer.
+Instructions:
+  - Provide a sentence-forming output for the given Dataframe Answer concerning the User query.
+  - Strictly use the Dataframe Answer provided below. Do not deduce, just use the provided Dataframe Answer.
+  - Use every data that is provided in Dataframe Answer. Do not miss any of the data while forming the sentence or paragraph.
+  - Dataframe Answer can be in form of NumPy array, dataframe object or any of the Python datatype. Form a proper sentence or paragraph from it.
+  - Remove any words that are related to programmings like NumPy, dataframe or Python datatypes.
+  - Form a sentence with whatever Dataframe Answer is provided.
+User query: {user_input}
+Dataframe Answer:
+{gpt3_output}
+"""
+    response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1, stream=False, max_tokens=1024, presence_penalty=0, frequency_penalty=0)
+    humanize_response = response["choices"][0]["message"]["content"]
+    print("Humanize output from ChatGPT => ", humanize_response)
+    return humanize_response
+
+
 def is_valid_hurdat_response(hurdat_response):
     
     if not hurdat_response:

@@ -45,6 +45,7 @@ six==1.16.0
 smart-open==6.3.0
 srsly==2.4.6
 thinc==8.1.9
+tiktoken==0.3.3
 tqdm==4.65.0
 typer==0.7.0
 typing-extensions==4.5.0

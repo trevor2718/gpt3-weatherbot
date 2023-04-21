@@ -10,7 +10,7 @@ import time
 # from chat_utils import update_previous_chat, get_previous_chat, set_previous_chat
 # from db_utils import get_db_connection, insert_to_db, check_daily_limit
 from chat_gpt_utils import get_chat_gpt_response, get_location_from_chat_gpt
-from myradar_utils import get_chatbot_reply, find_datetime_location,get_hurdat_response, is_valid_hurdat_response
+from myradar_utils import get_chatbot_reply, find_datetime_location,get_hurdat_response, is_valid_hurdat_response, get_formatted_response
 from load_hurdat_data import download_latest_data
 from convert_dataset import convert_to_df
 
@@ -79,13 +79,18 @@ def _get_chat_gpt_reply():
             hurdat_response = get_hurdat_response(user_msg)
             hurdat_flag = is_valid_hurdat_response(hurdat_response)
             
+            
             # return to chatbot here if flag is true
             if hurdat_flag:
+                # Get formatted response from ChatGPT
+                humanize_response = get_formatted_response(user_msg, hurdat_response)
+                humanize_response = humanize_response.replace("\n","<br />")
+                
                 # got the answer from the HURDAT2 database
                 cur_time = str(datetime.timedelta(seconds=666))
                 r_data = {
                     "flag": "success",
-                    "msg": hurdat_response,
+                    "msg": humanize_response,
                     "time": cur_time
                 }
                 return jsonify(r_data)
