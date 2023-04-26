@@ -145,3 +145,5 @@ static_location.py
 myradar_api_response.json
 hurdat_data/
 relative_location_name*
+200_lat-long.csv
+bkp_hurdat_data/

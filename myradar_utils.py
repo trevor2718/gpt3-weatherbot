@@ -18,6 +18,7 @@ geolocator = Nominatim(user_agent="MyRadar Weather App")
 config = dotenv_values(".env") 
 
 myradar_api_key = config["myradar_api_key"]
+download_dir = "hurdat_data"
 
 latest_csv_file = get_latest_csv_file()
 
@@ -29,7 +30,20 @@ if not latest_csv_file:
         df_path = convert_to_df(file_path)
         if df_path:
             print("Text data succesfully converted.")
+            print("Merging the CSV file now.")
             latest_csv_file = get_latest_csv_file()
+            
+            df_without_loc = pd.read_csv(latest_csv_file)
+            df_with_loc = pd.read_csv(f"./csv_with_53971.csv")
+            
+            new_loc = df_with_loc[ ["Unnamed: 0", "location_name", "location_country", "location_region" ] ]
+            with_loc_csv = pd.merge(df_without_loc, new_loc, on ='Unnamed: 0')
+            
+            latest_csv_file = f"{download_dir}/final_csv_data.csv"
+            with_loc_csv.to_csv(latest_csv_file)
+            print("Merged the csv files.")
+
+            
         else:
             print("unable to convert text data to csv data")
             exit()
@@ -38,6 +52,7 @@ if not latest_csv_file:
         exit()
 
 df = pd.read_csv(latest_csv_file)
+print(df.tail())
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
