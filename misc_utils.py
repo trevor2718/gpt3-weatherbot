@@ -15,6 +15,9 @@ def get_latest_csv_file():
         if not os.path.exists(download_dir):
             return False
         
+        if not os.path.exists(f"{download_dir}/final_csv_data.csv"):
+            return False
+        
         csv_files = glob.glob(f"{download_dir}/*.csv")
         
         if csv_files and len(csv_files):
