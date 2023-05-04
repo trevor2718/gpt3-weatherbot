@@ -204,7 +204,7 @@ def get_time_comparision(user_time, json_data):
 # takes user's query and outputs the prompt
 def create_hurdat_prompt(user_query):
     print("using data from => ", latest_csv_file)
-    column_names = "index, basin, atcf_cyclone_number_for_that_year, name, year, month, day, hours_in_utc, minutes_in_utc, record_identifier, record_identifier_desc, status_of_system, status_of_system_desc, latitude, longitude, maximum_sustained_wind_in_knots, minimum_pressure_in_millibars,location_name,location_country,location_region"
+    column_names = "index, atcf_id, basin, atcf_cyclone_number_for_that_year, name, year, month, day, hours_in_utc, minutes_in_utc, record_identifier, record_identifier_desc, status_of_system, status_of_system_desc, latitude, longitude, maximum_sustained_wind_in_knots, minimum_pressure_in_millibars,location_name,location_country,location_region"
     
     prompt = f"""
 Below are the HURDAT2 CSV database columns loaded into dataframe.
@@ -212,11 +212,11 @@ Dataframe Columns:
 {column_names}
 Sample Dataframe data:
 {column_names}
-53346,AL,17,ROSE,2021,9,22,0,0,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),22.7,-37.7,35.0,1008.0,North Atlantic Ocean,,
-53347,AL,17,ROSE,2021,9,22,0,60,,,TD,Tropical cyclone of tropical depression intensity (< 34 knots),23.1,-38.1,30.0,1009.0,North Atlantic Ocean,,
-53536,AL,02,2022,BONNIE,2022,7,2,0,30,L,Landfall (center of system crossing a coastline),TS,Tropical cyclone of tropical storm intensity (34-63 knots),11.0,-83.8,50.0,996.0,Bluefields,Nicaragua,Rio San Juan
-53537,AL,02,2022,BONNIE,2022,7,2,0,60,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),11.1,-84.5,40.0,1000.0,San Carlos,Nicaragua,Rio San Juan
-53575,AL,03,2022,COLIN,2022,7,2,0,0,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),32.5,-80.4,35.0,1011.0,Colleton County,United States,South Carolina
+53346,AL172021,AL,17,ROSE,2021,9,22,0,0,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),22.7,-37.7,35.0,1008.0,North Atlantic Ocean,,
+53347,AL172021,AL,17,ROSE,2021,9,22,0,60,,,TD,Tropical cyclone of tropical depression intensity (< 34 knots),23.1,-38.1,30.0,1009.0,North Atlantic Ocean,,
+53536,AL022022,AL,02,2022,BONNIE,2022,7,2,0,30,L,Landfall (center of system crossing a coastline),TS,Tropical cyclone of tropical storm intensity (34-63 knots),11.0,-83.8,50.0,996.0,Bluefields,Nicaragua,Rio San Juan
+53537,AL022022,AL,02,2022,BONNIE,2022,7,2,0,60,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),11.1,-84.5,40.0,1000.0,San Carlos,Nicaragua,Rio San Juan
+53575,AL022022,AL,03,2022,COLIN,2022,7,2,0,0,,,TS,Tropical cyclone of tropical storm intensity (34-63 knots),32.5,-80.4,35.0,1011.0,Colleton County,United States,South Carolina
 Dataframe details:
     - Name of the cyclones are in the `name` column.
     - Name of the location is in the `location_name` column.
@@ -227,7 +227,7 @@ Dataframe details:
     - Never use `record_identifier` column.
     - 'HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO', 'WV' and 'DB' are denoted in the `status_of_system` column.
     - 'atcf_cyclone_number_for_that_year' column denotes the cyclone number for that year.
-    - All of the entries in `status_of_system` column except 'DB' and 'WV' are cyclone.
+    - All of the entries in `status_of_system` column except 'DB' and 'WV' are cyclone `DB` denotes Disturbance and `WV` denotes Tropical Wave.
 Coding Instructions:
     - Data is there in the pandas dataframe and dataframe is defined as `df`.
     - Do not provide any written description or interpretation of the code.
@@ -236,6 +236,8 @@ Coding Instructions:
     - Current year is {datetime.datetime.now().year}.
     - Include `year` column in each response wherever necessary.
     - Provide year along with the cyclone names.
+    - Maximum the speed cyclone has the stronger the cyclone is this is also right for Disturbance and Tropical Wave .
+    - Add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query when there is calculation of cyclone number in any User Query if not present.
     - Strictly reply the code in print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
 Examples:
     - User query: Names of cyclones hits in any year.
@@ -246,6 +248,8 @@ Examples:
     print(len(df.loc[(df['year'].between(1851, 1858)) & (df['record_identifier']=='L')].groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()))
     - When was KEITH hit?
     print(list(df[df['name']=='KEITH']['year'].unique()))
+    - Is hurrican ALLEN stronger than WILMA?
+    print(df.loc[(df['name']=='ALLEN') & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO']))]['maximum_sustained_wind_in_knots'].max() > df.loc[(df['name']=='WILMA') & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO']))]['maximum_sustained_wind_in_knots'].max())
 Consider the Examples style code while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
 User Query: {user_query}"""
@@ -312,6 +316,15 @@ Examples:
     - User query: when was KEITH hit?
     Dataframe Answer: [1988, 2000]
     Keith cyclone hit in the year 1988 and 2000.
+    - User query: Could I get a list with the names and ATCF ID?
+    Dataframe Answer:  [['TWELVE', 'AL122022'], ['JULIA', 'AL132022'], ['KARL', 'AL142022'], ['LISA', 'AL152022'], ['MARTIN', 'AL162022'], ['NICOLE', 'AL172022']]
+    The cyclone hits are as follow.
+    TWELVE AL122022
+    JULIA AL132022
+    KARL AL142022
+    LISA AL152022
+    MARTIN AL162022
+    NICOLE AL172022
 User query: {user_input}
 Dataframe Answer:
 {gpt3_output}"""

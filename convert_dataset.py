@@ -150,6 +150,15 @@ def convert_to_df(filepath):
 
             df=pd.DataFrame(pf)
             df.columns=columns_name()
+            
+            # add atcf_id
+            atcf_id_list = []
+            for index, row in enumerate(df.iterrows()):
+                
+                cur_row = row[1]
+                atcf_id = f'{cur_row["basin"].strip()}{(cur_row["atcf_cyclone_number_for_that_year"].strip())}{cur_row["year"]}'
+                atcf_id_list.append( atcf_id )
+            df.insert(loc=0, column='atcf_id', value=atcf_id_list)
             df.to_csv(new_filepath)
             print(df.shape)
             return new_filepath

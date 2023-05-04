@@ -26,26 +26,82 @@
   <script type="text/javascript" src="/static/js/notifyit.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;600;700&display=swap" rel="stylesheet">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <style>
+    .card{
+      filter: drop-shadow(15px 77px 42px #2c055fbf);
+    }
     .card-header {
       display: flex !important;
       justify-content: space-between !important;
       align-items: center;
+      background: #2c055fbf;
+    }
+    .card-header h2 {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 600 !important;
+      color: whitesmoke;
     }
 
     code {
       font-family: 'Space Mono', monospace !important;
       font-size: 14px;
     }
+    .container{
+      max-width: 1080px !important;
+    }
+    .user {
+      color: black !important;
+      background: #FFAFBD;
+      background: -webkit-linear-gradient(to right, #ffc3a0, #FFAFBD);
+      background: linear-gradient(to right, #ffc3a0, #FFAFBD);
+    }
+    .new_chatbot{
+      background: #C9D6FF;
+      background: -webkit-linear-gradient(to right, #E2E2E2, #C9D6FF);
+      background: linear-gradient(to right, #E2E2E2, #C9D6FF);
+      color: black;
+    }
+    .fa-paper-plane{
+      color: #2c055fbf;
+      font-size: 20px;
+    }
+    .middle{
+      margin: auto 0%;
+    }
+    #chat-widget{
+      scroll-behavior: smooth;
+    }
+    #chat-widget::-webkit-scrollbar-track
+    {
+      border-radius: 10px;
+    }
+
+    #chat-widget::-webkit-scrollbar
+    {
+      width: 12px;
+    }
+
+    #chat-widget::-webkit-scrollbar-thumb
+    {
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    }
   </style>
 </head>
 
-<body>
-  <section style="background-color: #CDC4F9;">
+<body style="background-color: #CDC4F9;">
+  <section >
     <div class="container py-5">
 
-      <div class="row">
-        <div class="col-md-12">
+      <div class="row ">
+        <div class="col-md-12 middle">
 
           <div class="card" id="chat3" style="border-radius: 15px;">
 
@@ -66,36 +122,10 @@
 
                   <div id="chat-widget" class="pt-3 pe-3 overflow-auto" style="position: relative; max-height: 400px; ">
 
-                    {% for chat in data %}
-                    {% set display_time = chat['created'].split(' ') %}
-                    <div class="d-flex flex-row justify-content-end">
-                      <div>
-                        <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{{chat['user_input']}}</p>
-                        <p class="small me-3 mb-3 rounded-3 text-muted">{{display_time[1]}}</p>
-                      </div>
-                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                        alt="avatar 1" style="width: 45px; height: 100%;">
-                    </div>
-
-
-                    <div class="d-flex flex-row justify-content-start">
-                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
-                        alt="avatar 1" style="width: 45px; height: 100%;">
-                      <div>
-                        <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">
-                          {{chat['chatbot_reply']}}</p>
-                        <p class="small ms-3 mb-3 rounded-3 text-muted float-end">{{display_time[1]}}</p>
-                      </div>
-                    </div>
-
-                    {% endfor %}
-
-
-
                   </div>
 
                   <div class="text-muted d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+                    <img src="static/img/mix.png"
                       alt="avatar 3" style="width: 40px; height: 100%;">
                     <input type="text" class="form-control form-control-lg" id="exampleFormControlInput2"
                       placeholder="Type message">
@@ -174,7 +204,6 @@
         if (user_msg.trim() != "") {
           var d = new Date();
           var cur_time = d.toLocaleTimeString();
-
           await send_message(user_msg.trim());
           update_chat(user_msg, cur_time, "user");
 
@@ -218,10 +247,10 @@
           var key = "```";
 
           var all_index = [];
-          var chat = `<div class="d-flex flex-row justify-content-start">
-                      <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 1" style="width: 45px; height: 100%;">
+          var chat = `<div class="d-flex flex-row justify-content-start animate__animated animate__headShake">
+                      <img src="static/img/chatbot.png" alt="avatar 1" style="width: 45px; height: 100%;">
                       <div>
-                        <p class="small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">`
+                        <p class="new_chatbot small p-2 ms-3 mb-1 rounded-3" style="background-color: #f5f6f7;">`
 
           var index_occurence = chat_msg.indexOf(key, 0);
          
@@ -285,12 +314,12 @@
                       </div>
                     </div>`
         } else {
-          chat = `<div class="d-flex flex-row justify-content-end">
+          chat = `<div class="d-flex flex-row justify-content-end animate__animated animate__headShake">
                         <div>
-                          <p class="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">${chat_msg}</p>
+                          <p class="user small p-2 me-3 mb-1 text-white rounded-3 bg-primary">${chat_msg}</p>
                           <p class="small me-3 mb-3 rounded-3 text-muted">${cur_time}</p>
                         </div>
-                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                        <img src="static/img/mix.png"
                           alt="avatar 1" style="width: 45px; height: 100%;">
                       </div>`;
 
