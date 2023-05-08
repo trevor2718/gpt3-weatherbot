@@ -128,7 +128,7 @@ def get_chatbot_reply(user_msg, previous_chat, location, date_time):
         
         print("weather_prompt => ", weather_prompt)
         
-        openai_response = get_chat_gpt_response(previous_chat, weather_prompt)
+        openai_response = get_chat_gpt_response(weather_prompt)
         chatbot_reply = openai_response["choices"][0]["message"]["content"]
 
         return chatbot_reply, openai_response
@@ -238,18 +238,26 @@ Coding Instructions:
     - Provide year along with the cyclone names.
     - Maximum the speed cyclone has the stronger the cyclone is this is also right for Disturbance and Tropical Wave .
     - Add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query when there is calculation of cyclone number in any User Query if not present.
-    - Strictly reply the code in print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
+    - Strictly reply the generated code in a single print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
 Examples:
+    - User query: Name the cyclone hit after CHANTAL?
+    print(df.loc[df.loc[df['name']=='CHANTAL'].tail(1).index[0]+1]["name"])
+    
     - User query: Names of cyclones hits in any year.
     print(df[df['year']==1851].groupby('atcf_cyclone_number_for_that_year')['name'].first().tolist())
-    - User query: Number of cyclone hit in year 1996 
+    
+    - User query: Number of cyclone hit in year 1996.
     print(len(df.loc[(df['year'] == 1996) & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO'])) ].groupby(['year', 'atcf_cyclone_number_for_that_year'])['name'].first().tolist()))
+    
     - How many cylones hit between 1851 and 1858 that made landfall.
     print(len(df.loc[(df['year'].between(1851, 1858)) & (df['record_identifier']=='L')].groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()))
+    
     - When was KEITH hit?
     print(list(df[df['name']=='KEITH']['year'].unique()))
+    
     - Is hurrican ALLEN stronger than WILMA?
     print(df.loc[(df['name']=='ALLEN') & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO']))]['maximum_sustained_wind_in_knots'].max() > df.loc[(df['name']=='WILMA') & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO']))]['maximum_sustained_wind_in_knots'].max())
+    
 Consider the Examples style code while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
 User Query: {user_query}"""
@@ -313,9 +321,18 @@ Instructions:
   - 'UNNAMED' is the name of the cyclone.
   - Never use 'Dataframe Answer' as a string while generating the answer.
 Examples:
+    - User query: Which one was stronger between 2005 Wilma and 1980 Allen?
+    Dataframe Answer: True
+    1980 Allen was stronger then 2005 Wilma.
+    
+    - User query: Which one was stronger between 2005 Wilma and 1980 Allen?
+    Dataframe Answer: False
+    1980 Allen was stronger then 2005 Wilma.
+    
     - User query: when was KEITH hit?
     Dataframe Answer: [1988, 2000]
     Keith cyclone hit in the year 1988 and 2000.
+    
     - User query: Could I get a list with the names and ATCF ID?
     Dataframe Answer:  [['TWELVE', 'AL122022'], ['JULIA', 'AL132022'], ['KARL', 'AL142022'], ['LISA', 'AL152022'], ['MARTIN', 'AL162022'], ['NICOLE', 'AL172022']]
     The cyclone hits are as follow.
@@ -325,6 +342,7 @@ Examples:
     LISA AL152022
     MARTIN AL162022
     NICOLE AL172022
+    
 User query: {user_input}
 Dataframe Answer:
 {gpt3_output}"""
