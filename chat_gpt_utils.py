@@ -108,7 +108,12 @@ def get_location_from_chat_gpt(user_msg):
 
 
 def get_distance_info(user_msg):
-    prompt = f'''Act as a NER model and find only the distance, location and intent of the user msg do not form a sentence strictly follow the instructions. If the user has asked about the nearby location info then and only then provide a valid response else provide `not_found`. If distance is not provided and given approx distance then use 10km as a default nearby/around distance.
+    prompt = f'''This is an intent detection task. Your job is to identify if the user is asking about cyclones or hurricanes occurring near a specific location within a certain distance. If the user does not provide a distance, but mentions a term implying proximity like 'near', 'around', 'close', etc., assume a default distance of 10 km.
+
+Make sure to only identify the location and distance (if provided), and the user's intent to know about cyclones/hurricanes. If there's no intent or the intent does not involve asking about cyclones/hurricanes near a location, return 'not_found'. If the user's intent is detected correctly, return the location and distance in the format `["location, distance"]`. If the distance is not provided, use the default distance of 10 km.
+
+Here are some examples:
+
 Input: How many cyclones occurred in Miami?
 Output: not_found
 
@@ -121,15 +126,23 @@ Output: not_found
 Input: How many hurricanes occurred nearly 10 miles from London?
 Output: ["London, 10 miles"]
 
-Input: How many hurricanes occurred nearly 10 miles from London and which?
-Output: ["London, 10 miles", "name"]
-
-Input: How many hurricanes occurred nearly 10 miles from London? list all.
-Output: ["London, 10 miles", "name"]
-
 Input: How many hurricanes occurred nearly 10 miles from London? and give the names
-Output: ["London, 10 miles", "name"]
+Output: ["London, 10 miles"]
 
+Input: How many hurricanes occurred nearly 10 miles from London in the year of 2022?
+Output: ["London, 10 miles"]
+
+Input: How many hurricanes occurred nearly 10 km from London in the year of 2022?
+Output: ["London, 10 km"]
+
+Input: How many hurricanes occurred between 2010 and 2020 within 10 miles of London?
+Output: ["London, 10 miles"]
+
+Input: How many hurricanes occurred between 2010 and 2020 within 10 miles of London? And which?
+Output: ["London, 10 miles"]
+
+
+Strictly do not generates output like `["Florida, 100 km"], not_found` generates any of one and never return 'not_found' in the list.
 Differentiate distance and location with `,` strictly in the output.
      Input: {user_msg.strip()}\nOutput: '''
     max_input_token = 2560
@@ -216,25 +229,10 @@ def find_matching_points(input_str):
     # Update latitude and longitude columns in the DataFrame
     df['latitude'] = df['latitude'].apply(remove_trailing_zero)
     df['longitude'] = df['longitude'].apply(remove_trailing_zero)
-
-    # Compare and find matching points
-    matching_points = df[df.apply(lambda row: (row['latitude'], row['longitude']) in nearby_points_updated, axis=1)]
-    unique_cyclones_matching_points = matching_points.groupby(['year', 'atcf_cyclone_number_for_that_year'])['name'].first().reset_index()
-    unique_cyclones_matching_points_name = matching_points.groupby(['year', 'atcf_cyclone_number_for_that_year', 'name'])['name'].count().reset_index(name='count')
-
-    print("Unique Cyclone Occurrences for Matching Points:")
-    print(len(unique_cyclones_matching_points))
-    name_of_cyclone=unique_cyclones_matching_points_name['name'].tolist()
-    year_of_cyclone=unique_cyclones_matching_points_name['year'].tolist()
-    print(name_of_cyclone)
-    print(year_of_cyclone)
-    formated_list=[]
-    for i , j in zip(name_of_cyclone,year_of_cyclone):
-        formated_list.append(f'cyclone {i} in the year of {str(j)}')
     if len (input_str) == 1:
-        return (len(unique_cyclones_matching_points))
+        matching_points = df[df.apply(lambda row: (row['latitude'], row['longitude']) in nearby_points_updated, axis=1)]
+        print('this is matching points',matching_points.head())
+        return matching_points
     else:
-        if year_of_cyclone!=[]:
-            return formated_list
-        else:
-            return "No cyclone occured"
+        return "No cyclone occured"
+    

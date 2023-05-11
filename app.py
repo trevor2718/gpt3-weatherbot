@@ -13,7 +13,7 @@ from chat_gpt_utils import get_chat_gpt_response, get_location_from_chat_gpt,get
 from myradar_utils import get_chatbot_reply, find_datetime_location,get_hurdat_response, is_valid_hurdat_response, get_formatted_response
 from load_hurdat_data import download_latest_data
 from convert_dataset import convert_to_df
-
+from lat_long_utils import *
 config = dotenv_values(".env") 
 
 app = Flask(__name__)
@@ -80,19 +80,24 @@ def _get_chat_gpt_reply():
             distance_info = get_distance_info(user_msg)
             if distance_info != 'not_found':
                 unique_cyclones = find_matching_points(distance_info)
-                print('tis is the desire output',unique_cyclones)
-                if distance_info:
-                    humanize_response = get_formatted_response(user_msg, unique_cyclones)
-                    humanize_response = humanize_response.replace("\n","<br />")
+                hurdat_response_lat = get_hurdat_response_lat(user_msg,unique_cyclones)
+                hurdat_flag_lat = is_valid_hurdat_response_lat(hurdat_response_lat)
+
+                if hurdat_flag_lat:
+                    humanize_response_lat = get_formatted_response_lat(user_msg, hurdat_response_lat)
+                    humanize_response_lat = humanize_response_lat.replace("\n","<br />")
                     
                     # got the answer from the HURDAT2 database
                     cur_time = str(datetime.timedelta(seconds=666))
                     r_data = {
                         "flag": "success",
-                        "msg": humanize_response,
+                        "msg": humanize_response_lat,
                         "time": cur_time
                     }
                     return jsonify(r_data)
+
+                
+                
 
             # break
             else:

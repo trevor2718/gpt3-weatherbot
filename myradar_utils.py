@@ -257,6 +257,9 @@ Examples:
     
     - Is hurrican ALLEN stronger than WILMA?
     print(df.loc[(df['name']=='ALLEN') & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO']))]['maximum_sustained_wind_in_knots'].max() > df.loc[(df['name']=='WILMA') & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO']))]['maximum_sustained_wind_in_knots'].max())
+
+    - which was the strongest cyclone in the year of 2009?
+    - print(df.loc[(df['year'] == 1990) & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO', 'WV', 'DB']))]['name'][df.loc[(df['year'] == 1990) & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO', 'WV', 'DB']))]['maximum_sustained_wind_in_knots'].idxmax()])
     
 Consider the Examples style code while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
