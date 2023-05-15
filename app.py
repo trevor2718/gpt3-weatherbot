@@ -40,123 +40,134 @@ def reset_session():
 
 @app.route('/get_chat_gpt_reply', methods=["POST"])
 def _get_chat_gpt_reply():
+    try:
     
-    r_data = {}
-    chat_uuid = ""
-    location = "Orlando, FL"
-    date_time = "now"
-    
-    if "location" not in session:
-        session["location"] = location
-
-    if request.method == "POST":
+        r_data = {}
+        chat_uuid = ""
+        location = "Orlando, FL"
+        date_time = "now"
         
-        ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
-        
-        user_msg = request.form.get("user_msg")
-        if (user_msg is not None) or (not user_msg) or (not user_msg.strip() == ""):
-            
-            # set unique token per user
-            if "unique_token" not in session:
-                session["unique_token"] = str(uuid.uuid4())
-            
-            chat_uuid = session["unique_token"]
+        if "location" not in session:
+            session["location"] = location
 
-            # check max/min tokens
-            if len(user_msg) > 256 or len(user_msg.split(" ")) > 128:
+        if request.method == "POST":
+            
+            ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+            
+            user_msg = request.form.get("user_msg")
+            if (user_msg is not None) or (not user_msg) or (not user_msg.strip() == ""):
+                
+                # set unique token per user
+                if "unique_token" not in session:
+                    session["unique_token"] = str(uuid.uuid4())
+                
+                chat_uuid = session["unique_token"]
+
+                # check max/min tokens
+                if len(user_msg) > 256 or len(user_msg.split(" ")) > 128:
+                    r_data = {
+                        "flag": "fail",
+                        "msg": "Input text too large. Please provide smaller one.",
+                    }
+                    return r_data
+                
+                # previous_chat = get_previous_chat()
+                previous_chat = ""
+
+                # print("previous chat => ", previous_chat)
+                
+                # check whether chat is about hurricane or weather\
+                print("user msg => ", user_msg)
+                distance_info = get_distance_info(user_msg)
+                if distance_info != 'not_found':
+                    unique_cyclones = find_matching_points(distance_info)
+                    hurdat_response_lat = get_hurdat_response_lat(user_msg,unique_cyclones)
+                    hurdat_flag_lat = is_valid_hurdat_response_lat(hurdat_response_lat)
+
+                    if hurdat_flag_lat:
+                        humanize_response_lat = get_formatted_response_lat(user_msg, hurdat_response_lat)
+                        humanize_response_lat = humanize_response_lat.replace("\n","<br />")
+                        
+                        # got the answer from the HURDAT2 database
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": humanize_response_lat,
+                            "time": cur_time
+                        }
+                        return jsonify(r_data)
+
+                    
+                    
+
+                # break
+                else:
+                    hurdat_response = get_hurdat_response(user_msg)
+                    hurdat_flag = is_valid_hurdat_response(hurdat_response)
+                    
+                    
+                    # return to chatbot here if flag is true
+                    if hurdat_flag:
+                        # Get formatted response from ChatGPT
+                        humanize_response = get_formatted_response(user_msg, hurdat_response)
+                        humanize_response = humanize_response.replace("\n","<br />")
+                        
+                        # got the answer from the HURDAT2 database
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": humanize_response,
+                            "time": cur_time
+                        }
+                        return jsonify(r_data)
+                
+                
+                openai_response = get_location_from_chat_gpt(user_msg)
+                chatbot_reply = openai_response["choices"][0]["message"]["content"]
+                new_location, new_date_time = find_datetime_location(chatbot_reply)
+                
+                # print("NER prompt chatbot reply => ", chatbot_reply)
+                # print("detecteed new location => ",new_location, "\ndetected new datetime => ", new_date_time)
+                
+                if new_location and new_location.strip() != "" and ( not new_location.strip().lower() == "none"):
+                    # print("location detected if condition location => ", new_location)
+                    # print("*****")
+                    session["location"] = new_location
+                
+                if new_date_time and new_date_time.strip() != "" and ( not new_date_time.strip().lower() == "none"):
+                    # print("if condition location => ", date_time)
+                    date_time = new_date_time
+                
+                if "location" in session and session["location"]:
+                    # print("session location 92 => ", session['location'])
+                    chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
+                        
+                cur_time = str(datetime.timedelta(seconds=666))
+                r_data = {
+                    "flag": "success",
+                    "msg": chatbot_reply,
+                    "time": cur_time
+                }
+                return jsonify(r_data)
+            else:
+                # not using server chat timings. just sending from sever to client
+                cur_time = str(datetime.timedelta(seconds=666))
                 r_data = {
                     "flag": "fail",
-                    "msg": "Input text too large. Please provide smaller one.",
+                    "msg": "Please provide valid input.",
+                    "time": cur_time
                 }
-                return r_data
-            
-            # previous_chat = get_previous_chat()
-            previous_chat = ""
+                return jsonify(r_data)
+    except :
+        cur_time = str(datetime.timedelta(seconds=666))
+        r_data = {
+            "flag": "success",
+            "msg": "Please ask the question again",
+            "time": cur_time
+        }
+        return jsonify(r_data)
 
-            # print("previous chat => ", previous_chat)
-            
-            # check whether chat is about hurricane or weather\
-            print("user msg => ", user_msg)
-            distance_info = get_distance_info(user_msg)
-            if distance_info != 'not_found':
-                unique_cyclones = find_matching_points(distance_info)
-                hurdat_response_lat = get_hurdat_response_lat(user_msg,unique_cyclones)
-                hurdat_flag_lat = is_valid_hurdat_response_lat(hurdat_response_lat)
-
-                if hurdat_flag_lat:
-                    humanize_response_lat = get_formatted_response_lat(user_msg, hurdat_response_lat)
-                    humanize_response_lat = humanize_response_lat.replace("\n","<br />")
-                    
-                    # got the answer from the HURDAT2 database
-                    cur_time = str(datetime.timedelta(seconds=666))
-                    r_data = {
-                        "flag": "success",
-                        "msg": humanize_response_lat,
-                        "time": cur_time
-                    }
-                    return jsonify(r_data)
-
-                
-                
-
-            # break
-            else:
-                hurdat_response = get_hurdat_response(user_msg)
-                hurdat_flag = is_valid_hurdat_response(hurdat_response)
-                
-                
-                # return to chatbot here if flag is true
-                if hurdat_flag:
-                    # Get formatted response from ChatGPT
-                    humanize_response = get_formatted_response(user_msg, hurdat_response)
-                    humanize_response = humanize_response.replace("\n","<br />")
-                    
-                    # got the answer from the HURDAT2 database
-                    cur_time = str(datetime.timedelta(seconds=666))
-                    r_data = {
-                        "flag": "success",
-                        "msg": humanize_response,
-                        "time": cur_time
-                    }
-                    return jsonify(r_data)
-            
-            
-            openai_response = get_location_from_chat_gpt(user_msg)
-            chatbot_reply = openai_response["choices"][0]["message"]["content"]
-            new_location, new_date_time = find_datetime_location(chatbot_reply)
-            
-            # print("NER prompt chatbot reply => ", chatbot_reply)
-            # print("detecteed new location => ",new_location, "\ndetected new datetime => ", new_date_time)
-            
-            if new_location and new_location.strip() != "" and ( not new_location.strip().lower() == "none"):
-                # print("location detected if condition location => ", new_location)
-                # print("*****")
-                session["location"] = new_location
-            
-            if new_date_time and new_date_time.strip() != "" and ( not new_date_time.strip().lower() == "none"):
-                # print("if condition location => ", date_time)
-                date_time = new_date_time
-            
-            if "location" in session and session["location"]:
-                # print("session location 92 => ", session['location'])
-                chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
-                    
-            cur_time = str(datetime.timedelta(seconds=666))
-            r_data = {
-                "flag": "success",
-                "msg": chatbot_reply,
-                "time": cur_time
-            }
-            return jsonify(r_data)
-        else:
-            # not using server chat timings. just sending from sever to client
-            cur_time = str(datetime.timedelta(seconds=666))
-            r_data = {
-                "flag": "fail",
-                "msg": "Please provide valid input.",
-                "time": cur_time
-            }
-            return jsonify(r_data)
+        
 
     
 @app.route('/')

@@ -97,6 +97,7 @@ Dataframe details:
     - Use `maximum_sustained_wind_in_knots` column for calculating the speed of the wind.
     - One `atcf_id` indicates one cyclone.
     - `atcf_id` given in order oldest first latest last.
+    - Landfall denoted as 'L' in `record_identifier` column.
     
 Coding Instructions:
     - Data is there in the pandas dataframe and dataframe is defined as `df`.
@@ -107,6 +108,9 @@ Coding Instructions:
     - Maximum the speed cyclone has the stronger the cyclone is.
     - Add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query when there is calculation of cyclone number in any User Query if not present.
     - Strictly reply the code in print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
+
+
+
 
 Examples:
     - User query: How many cyclones occurred nearly 100 km from a specific location?
@@ -127,6 +131,9 @@ Examples:
     - User query: How many hurricanes occurred nearly 10 miles from London and which?
         print("There were a total of", len(df[(df['status_of_system'] == 'HU')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "hurricanes that occurred nearly 10 miles from London. The hurricanes are:", df[(df['status_of_system'] == 'HU')].groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist())
 
+    - User query:How many cyclones made landfall within 50 miles from miami?
+        print(len(df[df['record_identifier']=='L')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()))
+    
     Consider the Examples style code while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
 User Query: {user_query}"""
