@@ -49,6 +49,7 @@ Coding Instructions:
     - Strictly reply the code in print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
     - Do not define variables, strictly provide code in one line.
     - Strictly do not use print more than once.
+    - Landfall denoted as 'L' in `record_identifier` column.
 
 Examples:
 - User query: How many cyclones occurred nearly 100 km from a specific location?
@@ -72,73 +73,20 @@ print("There were a total of", len(df[(df['status_of_system'] == 'HU')].groupby(
 - User query: Any cyclone occured near 100km from florida has name ALLEN?
 print('ALLEN' in df['name])
 
+- User query:From 50 miles of miami how many cyclone makes landfall?
+    print(len(df[df['record_identifier']=='L')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()))
+
+- User query:How many cyclones made landfall within 50 miles of Miami?
+    print(len(df[df['record_identifier']=='L')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()))
+
+
+
 Consider the coding convention given in the Examples and follow the same code style while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
 User Query: {user_query}"""
     # print(prompt)
     return prompt
 
-
-def bak_create_hurdat_prompt_lat(user_query,dataframe):
-    df=dataframe
-    # print("using data from => ", latest_csv_file)
-    column_names = "index, atcf_id, basin, atcf_cyclone_number_for_that_year, name, year, month, day, hours_in_utc, minutes_in_utc, record_identifier, record_identifier_desc, status_of_system, status_of_system_desc, latitude, longitude, maximum_sustained_wind_in_knots, minimum_pressure_in_millibars,location_name,location_country,location_region"
-    
-    prompt = f"""
-Below are the HURDAT2 CSV database columns loaded into dataframe.
-Dataframe Columns:
-{column_names}
-Sample Dataframe data:
-{df.iloc[0:5]}
-Dataframe details:
-    - The dataframe df contains preprocessed data where cyclones occurred within a certain distance of a specific location. Strictly there is no need to filter by the `location_name`, `location_country`, or `location_region` in any queries.
-    - Name of the cyclones are in the `name` column.
-    - 'atcf_cyclone_number_for_that_year' column denotes the cyclone number for that year.
-    - Use `maximum_sustained_wind_in_knots` column for calculating the speed of the wind.
-    - One `atcf_id` indicates one cyclone.
-    - `atcf_id` given in order oldest first latest last.
-    - Landfall denoted as 'L' in `record_identifier` column.
-    
-Coding Instructions:
-    - Data is there in the pandas dataframe and dataframe is defined as `df`.
-    - Respond with the python code only.
-    - Current year is {datetime.datetime.now().year}.
-    - Include `year` column in each response wherever necessary.
-    - Provide year along with the cyclone names.
-    - Maximum the speed cyclone has the stronger the cyclone is.
-    - Add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query when there is calculation of cyclone number in any User Query if not present.
-    - Strictly reply the code in print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
-
-
-
-
-Examples:
-    - User query: How many cyclones occurred nearly 100 km from a specific location?
-        print("There were a total of", len(df.groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "cyclones that occurred nearly 100 km from the specific location.")
-
-    - User query: How many cyclones occurred nearly 100 km from a specific location in the year of 2022?
-        print("In 2022, there were a total of", len(df[(df['year'] == 2022)].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "cyclones that occurred nearly 100 km from the specific location.")
-
-    - User query: How many cyclones occurred nearly 100 km from a specific location with a maximum speed of 150?
-        print("There were a total of", len(df[(df['maximum_sustained_wind_in_knots'] == 150)].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "cyclones with a maximum speed of 150 that occurred nearly 100 km from the specific location.")
-
-    - User query: How many cyclones occurred nearly 100 km from Florida? And which?
-        print("There were a total of", len(df.groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "cyclones that occurred nearly 100 km from Florida. The cyclones are:", df.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist())
-
-    - User query: How many hurricanes occurred nearly 10 miles from London?
-        print("There were a total of", len(df[(df['status_of_system'] == 'HU')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "hurricanes that occurred nearly 10 miles from London.")
-
-    - User query: How many hurricanes occurred nearly 10 miles from London and which?
-        print("There were a total of", len(df[(df['status_of_system'] == 'HU')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()), "hurricanes that occurred nearly 10 miles from London. The hurricanes are:", df[(df['status_of_system'] == 'HU')].groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist())
-
-    - User query:How many cyclones made landfall within 50 miles from miami?
-        print(len(df[df['record_identifier']=='L')].groupby(['year', 'atcf_cyclone_number_for_that_year', 'name']).size()))
-    
-    Consider the Examples style code while generating new code for user query.
-Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
-User Query: {user_query}"""
-    # print(prompt)
-    return prompt
 
 
 def evaluate_code_lat(python_code,dataframe):

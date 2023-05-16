@@ -9,7 +9,7 @@ import time
 # manual file imports
 # from chat_utils import update_previous_chat, get_previous_chat, set_previous_chat
 # from db_utils import get_db_connection, insert_to_db, check_daily_limit
-from chat_gpt_utils import get_chat_gpt_response, get_location_from_chat_gpt,get_distance_info,find_matching_points
+from chat_gpt_utils import find_weather_question, get_chat_gpt_response, get_location_from_chat_gpt,get_distance_info,find_matching_points
 from myradar_utils import get_chatbot_reply, find_datetime_location,get_hurdat_response, is_valid_hurdat_response, get_formatted_response
 from load_hurdat_data import download_latest_data
 from convert_dataset import convert_to_df
@@ -40,11 +40,12 @@ def reset_session():
 
 @app.route('/get_chat_gpt_reply', methods=["POST"])
 def _get_chat_gpt_reply():
+    
     try:
     
         r_data = {}
         chat_uuid = ""
-        location = "Orlando, FL"
+        location = ""
         date_time = "now"
         
         if "location" not in session:
@@ -134,21 +135,64 @@ def _get_chat_gpt_reply():
                     # print("*****")
                     session["location"] = new_location
                 
+                else:
+                    # print(session)
+                    is_weather_question=find_weather_question(user_msg)
+                    # print("*****",is_weather_question)
+                    if is_weather_question == "1" and  session['location']=="":
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": "Please provide the location",
+                            "time": cur_time
+                        }
+                        session["previous_question"]= user_msg
+                        
+                        return jsonify(r_data)
+                    else:
+                        chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
+                            
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": chatbot_reply,
+                            "time": cur_time
+                        }
+                        return jsonify(r_data)
+            
                 if new_date_time and new_date_time.strip() != "" and ( not new_date_time.strip().lower() == "none"):
                     # print("if condition location => ", date_time)
                     date_time = new_date_time
                 
                 if "location" in session and session["location"]:
-                    # print("session location 92 => ", session['location'])
-                    chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
-                        
-                cur_time = str(datetime.timedelta(seconds=666))
-                r_data = {
-                    "flag": "success",
-                    "msg": chatbot_reply,
-                    "time": cur_time
-                }
-                return jsonify(r_data)
+                    print("==================",session['location'])
+                    print('location in session')
+                    if "previous_question" in session and  session['previous_question'] != "":
+                        print("yes")
+                        user_msg = session["previous_question"] + " location:"+ user_msg 
+                        session.pop("previous_question")
+
+                    
+                        chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
+                            
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": chatbot_reply,
+                            "time": cur_time
+                        }
+                        return jsonify(r_data)
+                    else:
+                        print('ergegegergergerg')
+                        chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
+                            
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": chatbot_reply,
+                            "time": cur_time
+                        }
+                        return jsonify(r_data)
             else:
                 # not using server chat timings. just sending from sever to client
                 cur_time = str(datetime.timedelta(seconds=666))
@@ -158,7 +202,8 @@ def _get_chat_gpt_reply():
                     "time": cur_time
                 }
                 return jsonify(r_data)
-    except :
+    except Exception as e :
+        print(e)
         cur_time = str(datetime.timedelta(seconds=666))
         r_data = {
             "flag": "success",
@@ -172,6 +217,7 @@ def _get_chat_gpt_reply():
     
 @app.route('/')
 def _chat_gpt():
+    session.clear()
     return render_template("chat_gpt.html")
 
 

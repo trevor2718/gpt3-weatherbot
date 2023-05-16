@@ -235,4 +235,22 @@ def find_matching_points(input_str):
         return matching_points
     else:
         return "No cyclone occured"
-    
+def find_weather_question(user_msg):
+        prompt = f'''Act as a NER model and  if you find any weather related question  then simply return 1 and if you find normal chat then simply return 0, Do not form a sentence. Input:what is weather today? Output:1 input:Hello how are you? output:0 , Input:Is there rain today? utput:1,Input: {user_msg.strip()}\nOutput:'''
+
+        max_input_token = 2560
+        prompt = trim_prompt_length(prompt, max_input_token)
+
+        msg_list = [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=msg_list
+        )
+        res_str = completion["choices"][0]["message"]["content"]
+        return res_str
