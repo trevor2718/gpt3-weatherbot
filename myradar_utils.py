@@ -225,6 +225,7 @@ Dataframe details:
     - Use `location_country` column if asked about country, `location_region` if asked about region otherwise use `location_name`.
     - Use `basin` column only when user wants basin related information. 
     - Never use `record_identifier` column.
+    - The cyclone which was closest approach to a coast, not followed by a landfall is denoted by `C` in `record_identifier` and if number of such cyclone asked in user query add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query.
     - 'HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO', 'WV' and 'DB' are denoted in the `status_of_system` column.
     - 'atcf_cyclone_number_for_that_year' column denotes the cyclone number for that year.
     - All of the entries in `status_of_system` column except 'DB' and 'WV' are cyclone `DB` denotes Disturbance and `WV` denotes Tropical Wave.
@@ -239,6 +240,9 @@ Coding Instructions:
     - Maximum the speed cyclone has the stronger the cyclone is this is also right for Disturbance and Tropical Wave .
     - Add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query when there is calculation of cyclone number in any User Query if not present.
     - Strictly reply the generated code in a single print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
+    - If the latitude is greater than or equal to zero then the data is for Northern Hemisphere and if latitude is less then zero then the data is of Southern Hemisphere if number of such cyclone asked in user query add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query.
+    - If the longitude is greater than zero then the data is for eastern Hemisphere and if longitude is less then or equal zero then the data is of Western Hemisphere if number of such cyclone asked in user query add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query.
+    
 Examples:
     - User query: Name the cyclone hit after CHANTAL?
     print(df.loc[df.loc[df['name']=='CHANTAL'].tail(1).index[0]+1]["name"])
@@ -260,6 +264,18 @@ Examples:
 
     - which was the strongest cyclone in the year of 2009?
     - print(df.loc[(df['year'] == 1990) & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO', 'WV', 'DB']))]['name'][df.loc[(df['year'] == 1990) & (df['status_of_system'].isin(['HU', 'TS', 'TD', 'EX', 'SD', 'SS', 'LO', 'WV', 'DB']))]['maximum_sustained_wind_in_knots'].idxmax()])
+
+    - If the 'cyclone' which affects maximum country asked then first find the `atcf_id` which affects the maximum country and then find the name of the cyclone for that `atcf_id`.
+    - print(df.loc[df['atcf_id'] == df.groupby('atcf_id')['location_country'].nunique().idxmax(), 'name'].iloc[0])
+
+    - which hurricane affect the most number of country?
+    - print(df.loc[(df['status_of_system']=='HU') & (df['atcf_id'] == df[df['status_of_system']=='HU'].groupby('atcf_id')['location_country'].nunique().idxmax()), 'name'].iloc[0])
+
+    - Which was the strongest cyclon ever?
+    - print( df.loc[df['maximum_sustained_wind_in_knots'].idxmax(), 'name'])
+
+
+    
     
 Consider the Examples style code while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
@@ -345,6 +361,16 @@ Examples:
     LISA AL152022
     MARTIN AL162022
     NICOLE AL172022
+
+    - User query: which cyclone affect the most number of country?
+    Dataframe Answer: Unnamed
+    The cyclone affects the most number of country was UNNAMED.
+    
+    - User query: which cyclone affect the most number of country?
+    Dataframe Answer: HELENE
+    The cyclone affects the most number of country was HELENE.
+
+
     
 User query: {user_input}
 Dataframe Answer:

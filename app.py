@@ -207,7 +207,7 @@ def _get_chat_gpt_reply():
         cur_time = str(datetime.timedelta(seconds=666))
         r_data = {
             "flag": "success",
-            "msg": "Please ask the question again",
+            "msg": "Answer not available in database",
             "time": cur_time
         }
         return jsonify(r_data)
