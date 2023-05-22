@@ -117,7 +117,7 @@ def get_hurdat_response_lat(user_msg,dataframe):
         # this will get 3 responses from the ChatGPT
         response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=3, stream=False, max_tokens=512, presence_penalty=0, frequency_penalty=0 )
         
-        print("response +++ ===>> ", response["choices"])
+        print("response +++ ===>>1 ", response["choices"])
         print("\n\n\n")
         for res in response["choices"]:
             python_code = res["message"]["content"]
@@ -128,8 +128,27 @@ def get_hurdat_response_lat(user_msg,dataframe):
             
         return python_result
     except Exception as e:
-        print("error in get hurdat_response => ", e)
-        return None
+        print(e)
+        print("###################################################")
+        if str(e)=="string indices must be integers":
+            prompt = create_hurdat_prompt_lat(user_msg,dataframe)
+        
+        # this will get 3 responses from the ChatGPT
+            response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=3, stream=False, max_tokens=512, presence_penalty=0, frequency_penalty=0 )
+            
+            print("response +++ ===>>2 ", response["choices"])
+            print("\n\n\n")
+            for res in response["choices"]:
+                python_code = res["message"]["content"]
+                python_result, error = evaluate_code_lat(python_code,dataframe)
+
+                if python_result and  ( python_result != "Python: SyntaxError" or ( not str(python_result).startswith("Empty DataFrame") ) or not( str(python_result).startswith("cant_find") ) ):
+                    break
+                
+            return python_result
+        else:
+            print("error in get hurdat_response => ", e)
+            return None
     
 
 def get_formatted_response_lat(user_input, gpt3_output):
@@ -169,10 +188,14 @@ Examples:
 User query: {user_input}
 Dataframe Answer:
 {gpt3_output}"""
+
     response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1, stream=False, max_tokens=1024, presence_penalty=0, frequency_penalty=0)
-    humanize_response = response["choices"][0]["message"]["content"]
-    print("Humanize output from ChatGPT => ", humanize_response)
-    return humanize_response
+    if response != "model is overloaded":
+                humanize_response = response["choices"][0]["message"]["content"]
+                print("Humanize output from ChatGPT => ", humanize_response)
+                return humanize_response
+    else:
+        return "Please re-ask the question as chatgpt is overloaded with the requests"
 
 
 def is_valid_hurdat_response_lat(hurdat_response):

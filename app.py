@@ -150,7 +150,9 @@ def _get_chat_gpt_reply():
                 else:
                     # print(session)
                     is_weather_question=find_weather_question(user_msg)
-                    # print("*****",is_weather_question)
+                    print(session['location'])
+
+                    print("*****",is_weather_question)
                     if is_weather_question == "1" and  session['location']=="":
                         cur_time = str(datetime.timedelta(seconds=666))
                         r_data = {
@@ -161,7 +163,8 @@ def _get_chat_gpt_reply():
                         session["previous_question"]= user_msg
                         
                         return jsonify(r_data)
-                    else:
+                    if is_weather_question=="0":
+                        print("7902372342093423042402947024230947230470234")
                         chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
                             
                         cur_time = str(datetime.timedelta(seconds=666))
@@ -204,7 +207,7 @@ def _get_chat_gpt_reply():
                             "msg": chatbot_reply,
                             "time": cur_time
                         }
-                        return jsonify(r_data)
+                        return jsonify(r_data)  
             else:
                 # not using server chat timings. just sending from sever to client
                 cur_time = str(datetime.timedelta(seconds=666))
@@ -215,6 +218,9 @@ def _get_chat_gpt_reply():
                 }
                 return jsonify(r_data)
     except Exception as e :
+        try:
+            return _get_chat_gpt_reply()
+        except:
         # print("==========================",e)
         # if "That model is currently overloaded with other requests." in e :
         #     print("======================================++++++++++++++++++++++++++++++++++")
@@ -226,13 +232,13 @@ def _get_chat_gpt_reply():
         #     }
         #     return jsonify(r_data)
 
-        cur_time = str(datetime.timedelta(seconds=666))
-        r_data = {
-            "flag": "success",
-            "msg": "Answer not available in database",
-            "time": cur_time
-        }
-        return jsonify(r_data)
+            cur_time = str(datetime.timedelta(seconds=666))
+            r_data = {
+                "flag": "success",
+                "msg": "Answer not available in database",
+                "time": cur_time
+            }
+            return jsonify(r_data)
 
         
 
@@ -280,4 +286,4 @@ def chat_history():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0",port=8005)

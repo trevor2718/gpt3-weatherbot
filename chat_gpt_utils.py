@@ -61,6 +61,7 @@ def get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1,
     
     max_input_token = 2560
     prompt = trim_prompt_length(prompt, max_input_token)
+
     
     msg_list = [
           {
@@ -68,20 +69,23 @@ def get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1,
             "content": prompt
         }
     ]
-       
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo", 
-        messages=msg_list,
-        temperature=temperature,
-        top_p=top_p,
-        n=n,
-        stream=stream,
-        max_tokens=max_tokens,
-        presence_penalty=presence_penalty,
-        frequency_penalty=frequency_penalty
-    )
+    try:   
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", 
+            messages=msg_list,
+            temperature=temperature,
+            top_p=top_p,
+            n=n,
+            stream=stream,
+            max_tokens=max_tokens,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty
+        )
 
-    return completion
+        return completion
+    except Exception as e:
+        if 'overloaded' in str(e):
+                return "model is overloaded"           
 
 
 def get_location_from_chat_gpt(user_msg):
@@ -243,7 +247,7 @@ def find_matching_points(input_str):
     else:
         return "No cyclone occured"
 def find_weather_question(user_msg):
-        prompt = f'''Act as a NER model and  if you find any weather related question  then simply return 1 and if you find normal chat then simply return 0, Do not form a sentence. Input:what is weather today? Output:1 input:Hello how are you? output:0 , Input:Is there rain today? utput:1,Input: {user_msg.strip()}\nOutput:'''
+        prompt = f'''Act as a NER model and  if you find any weather related question  then simply return 1 and if you find normal chat then simply return 0, Do not form a sentence. Input:what is weather today? Output:1 input:Hello how are you? output:0 ,Input:can i go for a walk when landfall is heppening? output:0, Input:Is there rain today? utput:1,Input: {user_msg.strip()}\nOutput:'''
 
         max_input_token = 2560
         prompt = trim_prompt_length(prompt, max_input_token)

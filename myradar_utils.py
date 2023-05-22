@@ -108,32 +108,42 @@ def get_forecast_data(latitude, longitude):
 
 
 def get_chatbot_reply(user_msg, previous_chat, location, date_time):
-    latitude, longitude = get_lat_long(location)
-    main_forecast_data = get_forecast_data(latitude, longitude)
-    # compare here
-    forecast_data = get_time_comparision(date_time, main_forecast_data)
-    
-    if forecast_data:    
-        weather_type = forecast_data.get("summary")
-        wind_mph = forecast_data.get("windSpeed")
-        clouds = forecast_data.get("cloudCover")
-        feelslike_f = forecast_data.get("apparentTemperature")
-        uv = forecast_data.get("uvIndex")
-        hourly_summary = main_forecast_data.get("hourly").get("summary")
-        if date_time:
-            weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tAbove forecast details are for: {date_time}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
-        else:
-            weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tGeneral weather summary: {hourly_summary}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
+    # print("this is location",location)
+    if location==None:
+        latitude, longitude = get_lat_long(location)
+        main_forecast_data = get_forecast_data(latitude, longitude)
+        # compare here
+        forecast_data = get_time_comparision(date_time, main_forecast_data)
+        
+        if forecast_data:    
+            weather_type = forecast_data.get("summary")
+            wind_mph = forecast_data.get("windSpeed")
+            clouds = forecast_data.get("cloudCover")
+            feelslike_f = forecast_data.get("apparentTemperature")
+            uv = forecast_data.get("uvIndex")
+            hourly_summary = main_forecast_data.get("hourly").get("summary")
+            if date_time:
+                weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tAbove forecast details are for: {date_time}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
+            else:
+                weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tGeneral weather summary: {hourly_summary}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
+                
             
+            print("weather_prompt => ", weather_prompt)
+            
+            openai_response = get_chat_gpt_response(weather_prompt)
+            chatbot_reply = openai_response["choices"][0]["message"]["content"]
+
+            return chatbot_reply, openai_response
+        else:
+            return "Some error occured. Unable to get the forecast details. Please try later", {}
+    else:
         
-        print("weather_prompt => ", weather_prompt)
-        
+        weather_prompt = f"""Act as a weather chatbot If user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences. do not be rude in answering.\nUser Query: {user_msg}\nMyRadar Chatbot: """
+
         openai_response = get_chat_gpt_response(weather_prompt)
         chatbot_reply = openai_response["choices"][0]["message"]["content"]
 
         return chatbot_reply, openai_response
-    else:
-        return "Some error occured. Unable to get the forecast details. Please try later", {}
     
 
 def find_datetime_location(chatbot_response):
@@ -310,9 +320,12 @@ def evaluate_code(python_code):
 def get_hurdat_response(user_msg):
     try:
         prompt = create_hurdat_prompt(user_msg)
+        # print(prompt)
         
         # this will get 3 responses from the ChatGPT
         response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=3, stream=False, max_tokens=512, presence_penalty=0, frequency_penalty=0 )
+        # print("status code",response.status_code)
+        
         
         print("response +++ ===>> ", response["choices"])
         print("\n\n\n")
@@ -325,8 +338,27 @@ def get_hurdat_response(user_msg):
             
         return python_result
     except Exception as e:
-        print("error in get hurdat_response => ", e)
-        return None
+        print("error in get hurdat_response =>1 ", e)
+        if str(e)=="string indices must be integers":
+            prompt = create_hurdat_prompt(user_msg)
+        
+        # this will get 3 responses from the ChatGPT
+            response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=3, stream=False, max_tokens=512, presence_penalty=0, frequency_penalty=0 )
+            print("status code",response.status_code)
+            
+            
+            print("response +++ ===>> ", response["choices"])
+            print("\n\n\n")
+            for res in response["choices"]:
+                python_code = res["message"]["content"]
+                python_result, error = evaluate_code(python_code)
+
+                if python_result and  ( python_result != "Python: SyntaxError" or ( not str(python_result).startswith("Empty DataFrame") ) or not( str(python_result).startswith("cant_find") ) ):
+                    break
+                
+            return python_result
+        else:
+            return None
     
 
 def get_formatted_response(user_input, gpt3_output):
@@ -379,9 +411,12 @@ def get_formatted_response(user_input, gpt3_output):
         Dataframe Answer:
         {gpt3_output}"""
             response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1, stream=False, max_tokens=1024, presence_penalty=0, frequency_penalty=0)
-            humanize_response = response["choices"][0]["message"]["content"]
-            print("Humanize output from ChatGPT => ", humanize_response)
-            return humanize_response
+            if response != "model is overloaded":
+                humanize_response = response["choices"][0]["message"]["content"]
+                # print("Humanize output from ChatGPT => ", humanize_response)
+                return humanize_response
+            else:
+                return "Please re-ask the question as chatgpt is overloaded with the requests"
     except Exception as e:
         print("this is exception",e)
         return e
