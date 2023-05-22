@@ -80,7 +80,7 @@ def _get_chat_gpt_reply():
                 # check whether chat is about hurricane or weather\
                 print("user msg => ", user_msg)
                 distance_info = get_distance_info(user_msg)
-                if distance_info != 'not_found':
+                if distance_info not in ['not_found' , '''["not_found"]''','''['not_found']''']:
                     unique_cyclones = find_matching_points(distance_info)
                     hurdat_response_lat = get_hurdat_response_lat(user_msg,unique_cyclones)
                     hurdat_flag_lat = is_valid_hurdat_response_lat(hurdat_response_lat)
@@ -110,6 +110,18 @@ def _get_chat_gpt_reply():
                     # return to chatbot here if flag is true
                     if hurdat_flag:
                         # Get formatted response from ChatGPT
+                        humanize_response = get_formatted_response(user_msg, hurdat_response)
+                        humanize_response = humanize_response.replace("\n","<br />")
+                        
+                        # got the answer from the HURDAT2 database
+                        cur_time = str(datetime.timedelta(seconds=666))
+                        r_data = {
+                            "flag": "success",
+                            "msg": humanize_response,
+                            "time": cur_time
+                        }
+                        return jsonify(r_data)
+                    elif hurdat_flag=="empty":
                         humanize_response = get_formatted_response(user_msg, hurdat_response)
                         humanize_response = humanize_response.replace("\n","<br />")
                         
@@ -203,7 +215,17 @@ def _get_chat_gpt_reply():
                 }
                 return jsonify(r_data)
     except Exception as e :
-        print(e)
+        # print("==========================",e)
+        # if "That model is currently overloaded with other requests." in e :
+        #     print("======================================++++++++++++++++++++++++++++++++++")
+        #     cur_time = str(datetime.timedelta(seconds=666))
+        #     r_data = {
+        #         "flag": "success",
+        #         "msg": "Openai is overloaded please ask the question one more time",
+        #         "time": cur_time
+        #     }
+        #     return jsonify(r_data)
+
         cur_time = str(datetime.timedelta(seconds=666))
         r_data = {
             "flag": "success",

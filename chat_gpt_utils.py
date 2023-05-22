@@ -141,8 +141,15 @@ Output: ["London, 10 miles"]
 Input: How many hurricanes occurred between 2010 and 2020 within 10 miles of London? And which?
 Output: ["London, 10 miles"]
 
+Input: How many tropical waves occured nearly 500 miles from florida?
+Output: ["Florida, 500 miles"]
 
-Strictly do not generates output like `["Florida, 100 km"], not_found` generates any of one and never return 'not_found' in the list.
+Input: How many Disturbance occured nearly 500 miles from florida?
+Output: ["Florida, 500 miles"]
+
+
+Strictly do not generates output like `["Florida, 100 km"], not_found` generates any of one and strictly never return 'not_found' in the list.
+Strictly do not generated 'not_found' alone in the list. and if generates in  list like ['not_found'] returns the 0th element of the list.
 Differentiate distance and location with `,` strictly in the output.
      Input: {user_msg.strip()}\nOutput: '''
     max_input_token = 2560
@@ -231,8 +238,8 @@ def find_matching_points(input_str):
     df['longitude'] = df['longitude'].apply(remove_trailing_zero)
     if len (input_str) == 1:
         matching_points = df[df.apply(lambda row: (row['latitude'], row['longitude']) in nearby_points_updated, axis=1)]
-        print('this is matching points',matching_points.head())
-        return matching_points
+        
+        return matching_points.drop(['latitude', 'longitude','location_name','location_country','location_region'],axis=1)
     else:
         return "No cyclone occured"
 def find_weather_question(user_msg):

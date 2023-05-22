@@ -280,6 +280,7 @@ Examples:
 Consider the Examples style code while generating new code for user query.
 Use above 'Dataframe Columns', 'Sample data', 'Dataframe details' and follow the 'Coding Instructions' strictly to generate only python code.
 User Query: {user_query}"""
+    print("user_query", user_query)
     return prompt
 
 
@@ -329,56 +330,61 @@ def get_hurdat_response(user_msg):
     
 
 def get_formatted_response(user_input, gpt3_output):
-    prompt = f"""Create an informative response from the given Dataframe Answer and User query. The response should be in a sentence or paragraph for the below given Dataframe Answer.
-Instructions:
-  - Provide a sentence-forming output from the given Dataframe Answer concerning the User query.
-  - Strictly use the Dataframe Answer provided below. Do not deduce, just use the provided Dataframe Answer.
-  - Use every data that is provided in Dataframe Answer. Do not miss any of the data while forming the sentence or paragraph.
-  - Dataframe Answer can be in form of NumPy array, dataframe object or any of the Python datatype. Form a proper sentence or paragraph from it.
-  - Remove any words that are related to programming like NumPy, dataframe or Python datatypes.
-  - Form a sentence with whatever Dataframe Answer is provided.
-  - 'UNNAMED' is the name of the cyclone.
-  - Never use 'Dataframe Answer' as a string while generating the answer.
-Examples:
-    - User query: Which one was stronger between 2005 Wilma and 1980 Allen?
-    Dataframe Answer: True
-    1980 Allen was stronger then 2005 Wilma.
-    
-    - User query: Which one was stronger between 2005 Wilma and 1980 Allen?
-    Dataframe Answer: False
-    1980 Allen was stronger then 2005 Wilma.
-    
-    - User query: when was KEITH hit?
-    Dataframe Answer: [1988, 2000]
-    Keith cyclone hit in the year 1988 and 2000.
-    
-    - User query: Could I get a list with the names and ATCF ID?
-    Dataframe Answer:  [['TWELVE', 'AL122022'], ['JULIA', 'AL132022'], ['KARL', 'AL142022'], ['LISA', 'AL152022'], ['MARTIN', 'AL162022'], ['NICOLE', 'AL172022']]
-    The cyclone hits are as follow.
-    TWELVE AL122022
-    JULIA AL132022
-    KARL AL142022
-    LISA AL152022
-    MARTIN AL162022
-    NICOLE AL172022
+    try:
+            prompt = f"""Create an informative response from the given Dataframe Answer and User query. The response should be in a sentence or paragraph for the below given Dataframe Answer.
+        Instructions:
+        - Provide a sentence-forming output from the given Dataframe Answer concerning the User query.
+        - Strictly use the Dataframe Answer provided below. Do not deduce, just use the provided Dataframe Answer.
+        - Use every data that is provided in Dataframe Answer. Do not miss any of the data while forming the sentence or paragraph.
+        - Dataframe Answer can be in form of NumPy array, dataframe object or any of the Python datatype. Form a proper sentence or paragraph from it.
+        - Remove any words that are related to programming like NumPy, dataframe or Python datatypes.
+        - Form a sentence with whatever Dataframe Answer is provided.
+        - 'UNNAMED' is the name of the cyclone.
+        - Never use 'Dataframe Answer' as a string while generating the answer.
+        - If 'Dataframe Answer` is a empty list or empty string form sentance according to the User query.
+        Examples:
+            - User query: Which one was stronger between 2005 Wilma and 1980 Allen?
+            Dataframe Answer: True
+            1980 Allen was stronger then 2005 Wilma.
+            
+            - User query: Which one was stronger between 2005 Wilma and 1980 Allen?
+            Dataframe Answer: False
+            1980 Allen was stronger then 2005 Wilma.
+            
+            - User query: when was KEITH hit?
+            Dataframe Answer: [1988, 2000]
+            Keith cyclone hit in the year 1988 and 2000.
+            
+            - User query: Could I get a list with the names and ATCF ID?
+            Dataframe Answer:  [['TWELVE', 'AL122022'], ['JULIA', 'AL132022'], ['KARL', 'AL142022'], ['LISA', 'AL152022'], ['MARTIN', 'AL162022'], ['NICOLE', 'AL172022']]
+            The cyclone hits are as follow.
+            TWELVE AL122022
+            JULIA AL132022
+            KARL AL142022
+            LISA AL152022
+            MARTIN AL162022
+            NICOLE AL172022
 
-    - User query: which cyclone affect the most number of country?
-    Dataframe Answer: Unnamed
-    The cyclone affects the most number of country was UNNAMED.
-    
-    - User query: which cyclone affect the most number of country?
-    Dataframe Answer: HELENE
-    The cyclone affects the most number of country was HELENE.
+            - User query: which cyclone affect the most number of country?
+            Dataframe Answer: Unnamed
+            The cyclone affects the most number of country was UNNAMED.
+            
+            - User query: which cyclone affect the most number of country?
+            Dataframe Answer: HELENE
+            The cyclone affects the most number of country was HELENE.
 
 
-    
-User query: {user_input}
-Dataframe Answer:
-{gpt3_output}"""
-    response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1, stream=False, max_tokens=1024, presence_penalty=0, frequency_penalty=0)
-    humanize_response = response["choices"][0]["message"]["content"]
-    print("Humanize output from ChatGPT => ", humanize_response)
-    return humanize_response
+            
+        User query: {user_input}
+        Dataframe Answer:
+        {gpt3_output}"""
+            response = get_chat_gpt_parameterized_response(prompt, temperature=0.0, top_p=1.0, n=1, stream=False, max_tokens=1024, presence_penalty=0, frequency_penalty=0)
+            humanize_response = response["choices"][0]["message"]["content"]
+            print("Humanize output from ChatGPT => ", humanize_response)
+            return humanize_response
+    except Exception as e:
+        print("this is exception",e)
+        return e
 
 
 def is_valid_hurdat_response(hurdat_response):
@@ -391,7 +397,7 @@ def is_valid_hurdat_response(hurdat_response):
     
     if hurdat_response and ( hurdat_response.strip() == "[]" or  hurdat_response.strip() == ""):
         print("empty array or empty response using hurdat prompt")
-        return False
+        return "empty"
     
     if hurdat_response.strip().lower() == "nan":
         return False
