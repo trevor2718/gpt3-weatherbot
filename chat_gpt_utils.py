@@ -247,7 +247,10 @@ def find_matching_points(input_str):
     else:
         return "No cyclone occured"
 def find_weather_question(user_msg):
-        prompt = f'''Act as a NER model and  if you find any weather related question  then simply return 1 and if you find normal chat then simply return 0, Do not form a sentence. Input:what is weather today? Output:1 input:Hello how are you? output:0 ,Input:can i go for a walk when landfall is heppening? output:0, Input:Is there rain today? utput:1,Input: {user_msg.strip()}\nOutput:'''
+        prompt = f'''Act as a NER model and if you find any weather related question then simply return 1 and if you find normal chat then simply return 0, Do not form a sentence.
+        Do reply like below examples and strict give the reply as given into examples if those questions asked.
+         examples:
+           Input:Can i go for a walk when it is raining? Output:0, Input:what is weather today? Output:1, Input:Hello how are you? Output:0 ,Input:can i go for a walk when landfall is heppening? Output:0, Input:Is there rain today? Output:1,Input: {user_msg.strip()}\nOutput:'''
 
         max_input_token = 2560
         prompt = trim_prompt_length(prompt, max_input_token)

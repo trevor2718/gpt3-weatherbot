@@ -165,7 +165,7 @@ def _get_chat_gpt_reply():
                         return jsonify(r_data)
                     if is_weather_question=="0":
                         print("7902372342093423042402947024230947230470234")
-                        chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
+                        chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, "Fixed", date_time)
                             
                         cur_time = str(datetime.timedelta(seconds=666))
                         r_data = {
@@ -198,7 +198,7 @@ def _get_chat_gpt_reply():
                         }
                         return jsonify(r_data)
                     else:
-                        print('ergegegergergerg')
+                        print('ergegegergergerg************')
                         chatbot_reply, openai_response = get_chatbot_reply(user_msg, previous_chat, session["location"], date_time)
                             
                         cur_time = str(datetime.timedelta(seconds=666))

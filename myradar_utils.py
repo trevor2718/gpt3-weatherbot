@@ -109,7 +109,9 @@ def get_forecast_data(latitude, longitude):
 
 def get_chatbot_reply(user_msg, previous_chat, location, date_time):
     # print("this is location",location)
-    if location==None:
+    if location!="Fixed":
+        print("**************",location)
+        print("8395ty498y5456u56u54u4")
         latitude, longitude = get_lat_long(location)
         main_forecast_data = get_forecast_data(latitude, longitude)
         # compare here
@@ -125,7 +127,7 @@ def get_chatbot_reply(user_msg, previous_chat, location, date_time):
             if date_time:
                 weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tAbove forecast details are for: {date_time}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
             else:
-                weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tGeneral weather summary: {hourly_summary}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.\nUser Query: {user_msg}\nMyRadar Chatbot: """
+                weather_prompt = f"""Act as a weather chatbot only if user asks about weather and prepare a reply for the user using the below information:\n\tLocation: {location}\n\tWeather: {weather_type}\n\tWind speed(mph): {wind_mph}\n\tClouds: {clouds}\n\tFeels like temperature(Fahrenheit): {feelslike_f}\n\tUV rays: {uv}\n\tGeneral weather summary: {hourly_summary}\n\nIf user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences.And, keep remember one thing People can go out unless there is hurricane, landfall, earthquake happening it is ok to go out in a rain with proper precautaion.\nUser Query: {user_msg}\nMyRadar Chatbot: """
                 
             
             print("weather_prompt => ", weather_prompt)
@@ -138,7 +140,12 @@ def get_chatbot_reply(user_msg, previous_chat, location, date_time):
             return "Some error occured. Unable to get the forecast details. Please try later", {}
     else:
         
-        weather_prompt = f"""Act as a weather chatbot If user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him. Strictly reply in less than 2 sentences. do not be rude in answering.\nUser Query: {user_msg}\nMyRadar Chatbot: """
+        weather_prompt = f"""Act as a chatbot If user is doing Routine conversation then ignore above weather information and talk as a personal assistant with him and keep remember one thing People can go out unless there is hurricane, landfall, earthquake happening. Strictly reply in less than 2 sentences. do not be rude in answering.
+        Do reply like below examples:
+        User Query:Can i go for a walk when it is raining?
+        Chatbot:Yes sure, but please take an umbrella or rain gear.
+        You can paraphrase the answer.
+        \nUser Query: {user_msg}\nChatbot: """
 
         openai_response = get_chat_gpt_response(weather_prompt)
         chatbot_reply = openai_response["choices"][0]["message"]["content"]
@@ -252,7 +259,7 @@ Coding Instructions:
     - Strictly reply the generated code in a single print statement, if User Query is not related to HURDAT2 return 'print("cant_find")'.
     - If the latitude is greater than or equal to zero then the data is for Northern Hemisphere and if latitude is less then zero then the data is of Southern Hemisphere if number of such cyclone asked in user query add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query.
     - If the longitude is greater than zero then the data is for eastern Hemisphere and if longitude is less then or equal zero then the data is of Western Hemisphere if number of such cyclone asked in user query add `.groupby(['year','atcf_cyclone_number_for_that_year'])['name'].first().tolist()` query.
-    
+    - For question like What is the strongest hurricanre ever ccured in atlantic? reply with the hurricane name.
 Examples:
     - User query: Name the cyclone hit after CHANTAL?
     print(df.loc[df.loc[df['name']=='CHANTAL'].tail(1).index[0]+1]["name"])
@@ -283,6 +290,13 @@ Examples:
 
     - Which was the strongest cyclon ever?
     - print( df.loc[df['maximum_sustained_wind_in_knots'].idxmax(), 'name'])
+
+    - What is the strongest hurricanre ever ccured in atlantic?
+    - print(df.loc[(df['basin']=='AL') & (df['status_of_system'].isin(['HU']))]['name'][df.loc[(df['basin']=='AL')]['maximum_sustained_wind_in_knots'].idxmax()])
+    add year with the cyclone name in above question
+    
+
+
 
 
     
